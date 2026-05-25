@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulir Izin Terpadu - PT Murinda Sentra Baja</title>
+    <style>
+        :root { 
+            --primary: #1e3a8a; 
+            --primary-light: #3b82f6;
+            --bg-body: #f8fafc;
+            --text-main: #1e293b;
+            --border-color: #cbd5e1;
+        }
+        
+        * { box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            background-color: var(--bg-body); 
+            padding: 30px 20px; 
+            color: var(--text-main); 
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .form-container { 
+            background: #fff; 
+            max-width: 850px; 
+            margin: auto; 
+            padding: 40px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
+            border-radius: 12px; 
+            border: 1px solid #e2e8f0;
+        }
+
+        /* HEADER SECTION */
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+            border-bottom: 3px double var(--primary);
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+        .header-logo-cell {
+            vertical-align: bottom;
+            padding-bottom: 8px;
+        }
+        .header-title-cell {
+            text-align: right;
+            vertical-align: bottom;
+            padding-bottom: 8px;
+        }
+        .company-title h2 { margin: 0; color: var(--primary); font-size: 22px; font-weight: 800; letter-spacing: 0.5px; line-height: 1.2; }
+        .company-title div { font-size: 13px; color: #64748b; margin-top: 2px; font-weight: 500; }
+        .doc-title-main { font-size: 18px; font-weight: bold; color: #1e293b; display: block; }
+        .doc-title-sub { font-size: 12px; font-weight: 500; color: #64748b; letter-spacing: 0.5px; display: block; margin-top: 2px; }
+        .doc-meta { font-size: 10px; color: #64748b; margin-top: 4px; }
+
+        /* SEARCH BAR */
+        .search-section {
+            background: #f1f5f9;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .search-group { flex: 1; display: flex; align-items: center; gap: 10px; }
+        .search-group label { margin-bottom: 0; white-space: nowrap; font-size: 14px; }
+        .search-input { 
+            flex: 1; 
+            padding: 10px 14px; 
+            border: 2px solid var(--border-color); 
+            border-radius: 6px; 
+            font-size: 14px; font-weight: 600; color: var(--primary);
+            transition: all 0.3s;
+        }
+        .search-input:focus { border-color: var(--primary-light); outline: none; background: #fff; }
+        .btn-search {
+            padding: 10px 24px; background: var(--primary); color: white; border: none; 
+            border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; transition: all 0.2s;
+        }
+        .btn-search:hover { background: #172554; transform: translateY(-1px); }
+
+        /* SECTION HEADER */
+        .section-header { 
+            font-weight: 700; color: var(--primary); 
+            border-bottom: 2px solid #e2e8f0; 
+            margin: 25px 0 15px 0; padding-bottom: 6px; 
+            text-transform: uppercase; font-size: 12px; letter-spacing: 1px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .section-header::before {
+            content: ''; display: inline-block; width: 4px; height: 15px; background: var(--primary-light); border-radius: 2px;
+        }
+        
+        /* FORM GRID & LAYOUTS */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 12px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 12px; }
+        .form-group { display: flex; flex-direction: column; }
+        
+        label { font-size: 12px; margin-bottom: 5px; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.3px; }
+        input[type="text"] { 
+            width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); 
+            border-radius: 6px; background-color: #fafafa; font-size: 13.5px; font-weight: 500; color: #334155;
+        }
+        input[type="text"]:focus { background-color: #fff; border-color: var(--primary-light); outline: none; }
+
+        /* CLASSIFICATION BOXES */
+        .grid-klasifikasi { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .klasifikasi-box { border: 1px solid #e2e8f0; padding: 16px; border-radius: 8px; background: #fff; }
+        .klasifikasi-box h4 { margin: 0 0 12px 0; font-size: 12px; color: var(--primary); border-bottom: 1px dashed #e2e8f0; padding-bottom: 6px; font-weight: 700; }
+        .checkbox-item { display: flex; align-items: center; font-size: 13px; margin-bottom: 8px; color: #334155; font-weight: 500; text-transform: none; cursor: pointer; }
+        .checkbox-item input { margin-right: 10px; width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
+
+        /* SIGNATURE SECTION */
+        .signature-table { width: 100%; border-collapse: collapse; margin-top: 35px; table-layout: fixed; }
+        .signature-table td { padding: 0 8px; }
+        .signature-table td:first-child { padding-left: 0; }
+        .signature-table td:last-child { padding-right: 0; }
+        .sig-container { border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; text-align: center; background: #fafafa; width: 100%; }
+        .sig-box { height: 65px; margin-bottom: 8px; }
+        .sig-label { font-size: 11px; font-weight: 700; color: #475569; border-top: 1px solid #e2e8f0; padding-top: 6px; text-transform: uppercase; }
+
+        /* SAFETY & RULES INFO */
+        .rules-box { background: #fff; border-left: 4px solid var(--primary); padding: 15px; margin-top: 30px; border-top: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; border-radius: 0 8px 8px 0; font-size: 12px; color: #475569; }
+        .rules-box strong { color: var(--primary); display: block; margin-bottom: 5px; }
+        
+        /* FOOTER INFO */
+        .footer-table { width: 100%; margin-top: 25px; padding-top: 12px; border-top: 1px solid #e2e8f0; font-size: 11px; color: #64748b; }
+        .footer-left { text-align: left; }
+        .footer-right { text-align: right; }
+
+        /* PRINT CONFIGURATION - MELEBARKAN SISI KIRI-KANAN & MENYEIMBANGKAN ATAS-BAWAH */
+        @media print {
+            @page { 
+                size: A4 portrait; 
+                margin: 20mm 22mm 20mm 22mm; /* Diperlebar (Kiri-Kanan 22mm) & Diberi ruang proporsional (Atas-Bawah 20mm) */
+            }
+            
+            html, body {
+                height: 100%;
+                background: none; 
+                padding: 0 !important; 
+                margin: 0 !important;
+                color: #000; 
+                font-size: 12px; /* Ukuran font ideal untuk keterbacaan penuh */
+            }
+
+            .form-container { 
+                box-shadow: none; 
+                border: none; 
+                max-width: 100%; 
+                width: 100%; 
+                height: 100%;
+                padding: 0 !important; 
+                margin: 0 !important;
+                background: transparent;
+            }
+
+            .no-print, .search-section { 
+                display: none !important; 
+            }
+
+            /* Header Section Spacing */
+            .header-table { 
+                margin-bottom: 18px; 
+                padding-bottom: 6px;
+                border-bottom: 2px solid #64748b;
+            }
+            .company-title h2 { font-size: 17px; }
+            .company-title div { font-size: 11.5px; }
+            .doc-title-main { font-size: 15px; }
+            .doc-title-sub { font-size: 11.5px; }
+            .doc-meta { font-size: 9.5px; margin-top: 2px; }
+
+            /* Melonggarkan Spacing Section Agar Mengisi Ruang Bawah Kertas */
+            .section-header { 
+                margin: 24px 0 12px 0; /* Menambah jarak vertikal antar bagian */
+                padding-bottom: 4px;
+                font-size: 12px;
+            }
+            
+            .grid-2, .grid-3 { 
+                gap: 15px; 
+                margin-bottom: 14px; /* Merenggangkan input box secara vertikal */
+            }
+            label { 
+                font-size: 10px; 
+                margin-bottom: 4px; 
+            }
+            input[type="text"] { 
+                border: none; 
+                border-bottom: 1px dashed #94a3b8; 
+                border-radius: 0; 
+                padding: 4px 0; 
+                background: transparent; 
+                font-size: 12.5px;
+            }
+
+            /* Jarak Area Klasifikasi */
+            .grid-klasifikasi { gap: 20px; }
+            .klasifikasi-box { padding: 14px 16px; }
+            .klasifikasi-box h4 { margin-bottom: 10px; padding-bottom: 5px; font-size: 11px; }
+            .checkbox-item { font-size: 11.5px; margin-bottom: 7px; }
+            .checkbox-item input { width: 14px; height: 14px; margin-right: 8px; }
+
+            /* Kolom Tanda Tangan Diperlebar & Dipertinggi Pas */
+            .signature-table { margin-top: 30px; }
+            .sig-container { padding: 10px; background: transparent; }
+            .sig-box { 
+                height: 85px; /* Ditambah tingginya agar space putih bawah terisi sempurna */
+                margin-bottom: 6px; 
+            }
+            .sig-label { font-size: 10.5px; padding-top: 5px; }
+
+            /* Kotak Aturan Keamanan */
+            .rules-box { 
+                margin-top: 30px; 
+                padding: 12px 15px; 
+                font-size: 11.5px; 
+                line-height: 1.6;
+            }
+            
+            /* Jarak Menuju Footer Akhir Kertas */
+            .footer-table { 
+                margin-top: 35px; 
+                padding-top: 10px; 
+                font-size: 10px; 
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <table class="header-table">
+        <tr>
+            <td class="header-logo-cell">
+                <div class="company-title">
+                    <img src="Murinda Logo.png" alt="Logo Murinda" style="height: 24px; width: auto; display: block; margin-bottom: 6px; object-fit: contain;">
+                    <h2>PT MURINDA SENTRA BAJA</h2>
+                    <div>Human Resource & Employee Services</div>
+                </div>
+            </td>
+            <td class="header-title-cell">
+                <span class="doc-title-main">Formulir Izin Terpadu</span>
+                <span class="doc-title-sub">(GATE PASS SYSTEM)</span>
+                <div class="doc-meta">
+                    No. Form: MSB/F-HR-006 &nbsp;|&nbsp; Revisi: 00
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <div class="search-section">
+        <div class="search-group">
+            <label for="id-izin-input"><strong>MASUKKAN ID IZIN :</strong></label>
+            <input type="text" id="id-izin-input" class="search-input" placeholder="Masukkan ID Izin dari Sheet...">
+        </div>
+        <button type="button" class="btn-search" onclick="fetchIzinData()">Cari & Sinkronisasi</button>
+    </div>
+
+    <div class="section-header">Informasi Personel & Karyawan</div>
+    <div class="grid-2">
+        <div class="form-group">
+            <label>ID Karyawan (NIK)</label>
+            <input type="text" id="nik-input" readonly>
+        </div>
+        <div class="form-group">
+            <label>Nama Lengkap</label>
+            <input type="text" id="nama-input" readonly>
+        </div>
+    </div>
+    <div class="grid-2">
+        <div class="form-group">
+            <label>Departemen</label>
+            <input type="text" id="dept-input" readonly>
+        </div>
+        <div class="form-group">
+            <label>Jabatan / Posisi</label>
+            <input type="text" id="jabatan-input" readonly>
+        </div>
+    </div>
+
+    <div class="section-header">Klasifikasi Ketidakhadiran / Jenis Izin</div>
+    <div class="grid-klasifikasi">
+        <div class="klasifikasi-box">
+            <h4>A. IZIN HARIAN (TIDAK MASUK)</h4>
+            <label class="checkbox-item"><input type="checkbox" id="check-cuti"> Cuti Tahunan (Annual Leave)</label>
+            <label class="checkbox-item"><input type="checkbox" id="check-sakit"> Izin Sakit (Medical - Lampirkan SKD)</label>
+            <label class="checkbox-item"><input type="checkbox" id="check-duka"> Duka / Kemalangan (Compassionate)</label>
+        </div>
+        <div class="klasifikasi-box">
+            <h4>B. IZIN KELUAR (GATE PASS)</h4>
+            <label class="checkbox-item"><input type="checkbox" id="check-dinas"> Dinas Luar (Work Related)</label>
+            <label class="checkbox-item"><input type="checkbox" id="check-pribadi"> Izin Pribadi (Meninggalkan Kantor)</label>
+            <label class="checkbox-item"><input type="checkbox" id="check-pulang"> Pulang Awal (Early Leave)</label>
+            <label class="checkbox-item"><input type="checkbox" id="check-mendesak"> Keperluan Mendesak (Urgent)</label>
+            <label class="checkbox-item"><input type="checkbox" id="check-terlambat"> Datang Terlambat (Late Arrival)</label>
+        </div>
+    </div>
+
+    <div class="section-header">Rincian Waktu, Durasi & Alasan</div>
+    <div class="grid-3">
+        <div class="form-group">
+            <label>Tanggal Mulai</label>
+            <input type="text" id="tgl-mulai-input" readonly>
+        </div>
+        <div class="form-group">
+            <label>Tanggal Selesai</label>
+            <input type="text" id="tgl-selesai-input" readonly>
+        </div>
+        <div class="form-group">
+            <label>Durasi (Hari)</label>
+            <input type="text" id="durasi-input" readonly>
+        </div>
+    </div>
+
+    <div class="grid-3">
+        <div class="form-group">
+            <label>Jam Keluar</label>
+            <input type="text" id="jam-keluar-input" readonly>
+        </div>
+        <div class="form-group">
+            <label>Jam Kembali</label>
+            <input type="text" id="jam-kembali-input" readonly>
+        </div>
+        <div class="form-group">
+            <label>Kembali ke Kantor?</label>
+            <input type="text" id="kembali-input" readonly>
+        </div>
+    </div>
+
+    <div class="grid-2" style="margin-top: 5px;">
+        <div class="form-group">
+            <label>Keterangan / Alasan Terperinci</label>
+            <input type="text" id="keterangan-input" readonly>
+        </div>
+        <div class="form-group">
+            <label>Serah Terima Tugas (Handover Ke)</label>
+            <input type="text" id="handover-input" readonly>
+        </div>
+    </div>
+
+    <table class="signature-table">
+        <tr>
+            <td>
+                <div class="sig-container">
+                    <div class="sig-box"></div>
+                    <div class="sig-label">Pemohon</div>
+                </div>
+            </td>
+            <td>
+                <div class="sig-container">
+                    <div class="sig-box"></div>
+                    <div class="sig-label">Atasan Langsung</div>
+                </div>
+            </td>
+            <td>
+                <div class="sig-container">
+                    <div class="sig-box"></div>
+                    <div class="sig-label">HR Department</div>
+                </div>
+            </td>
+            <td>
+                <div class="sig-container">
+                    <div class="sig-box"></div>
+                    <div class="sig-label">Security Gate</div>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <div class="rules-box">
+        <strong>Prosedur Keamanan & Ketertiban Gerbang:</strong>
+        <ol style="margin: 0; padding-left: 20px; line-height: 1.6;">
+            <li>Pengajuan izin harian wajib dilakukan H-3, kecuali kondisi darurat medis/sakit.</li>
+            <li>Formulir Gate Pass harus disetujui Atasan dan divalidasi fisik oleh Security di pos depan.</li>
+            <li>Tanpa dokumen ini, pihak Security berhak menahan karyawan untuk keluar/masuk area pabrik PT Murinda Sentra Baja.</li>
+        </ol>
+    </div>
+
+    <table class="footer-table">
+        <tr>
+            <td class="footer-left"><strong>Validasi HR System:</strong> Dokumen terintegrasi otomatis dengan ERP Database PT Murinda Sentra Baja.</td>
+            <td class="footer-right"><strong>Waktu Cetak:</strong> <span id="print-time"></span></td>
+        </tr>
+    </table>
+
+    <div style="text-align: center; margin-top: 25px;" class="no-print">
+        <button onclick="window.print()" style="padding: 12px 35px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.2s;">Cetak Dokumen / Simpan PDF</button>
+    </div>
+</div>
+
+<script>
+  var now = new Date();
+  var formatWaktu = now.toLocaleString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  document.getElementById('print-time').innerText = formatWaktu + ' WIB';
+
+  function clearCheckboxes() {
+    const checkboxes = ['check-cuti', 'check-sakit', 'check-duka', 'check-dinas', 'check-pribadi', 'check-pulang', 'check-mendesak', 'check-terlambat'];
+    checkboxes.forEach(id => document.getElementById(id).checked = false);
+  }
+
+  function fetchIzinData() {
+    var idIzin = document.getElementById('id-izin-input').value.trim();
+    if(!idIzin) { alert("Silakan isi ID Izin terlebih dahulu!"); return; }
+    
+    var url = "https://script.google.com/macros/s/AKfycbz0bjRuLCcXDmiQIL5xGtP0hwLkGeUllZYHGdXAg5S7xiWKiWSkU3w-B3EJAJtNktdVhw/exec" + "?idIzin=" + idIzin;
+
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        if(data.success === true) {
+          clearCheckboxes();
+
+          document.getElementById('nik-input').value = data.nik || "";
+          document.getElementById('nama-input').value = data.nama || "";
+          document.getElementById('jabatan-input').value = data.jabatan || "";
+          document.getElementById('dept-input').value = data.dept || "";
+          document.getElementById('tgl-mulai-input').value = data.tglMulai || "";
+          document.getElementById('tgl-selesai-input').value = data.tglSelesai || "";
+          document.getElementById('durasi-input').value = data.durasi ?? "";
+          document.getElementById('jam-keluar-input').value = data.jamKeluar || "-";
+          document.getElementById('jam-kembali-input').value = data.jamKembali || "-";
+          document.getElementById('kembali-input').value = data.kembali || "";
+          document.getElementById('keterangan-input').value = data.keterangan || "";
+          document.getElementById('handover-input').value = data.handover || "-";
+
+          var jenis = data.jenisIzin ? data.jenisIzin.trim().toLowerCase() : "";
+          
+          if(jenis.includes("cuti tahunan")) document.getElementById('check-cuti').checked = true;
+          else if(jenis.includes("sakit")) document.getElementById('check-sakit').checked = true;
+          else if(jenis.includes("duka") || jenis.includes("kemalangan")) document.getElementById('check-duka').checked = true;
+          else if(jenis.includes("dinas luar")) document.getElementById('check-dinas').checked = true;
+          else if(jenis.includes("izin pribadi")) document.getElementById('check-pribadi').checked = true;
+          else if(jenis.includes("pulang awal")) document.getElementById('check-pulang').checked = true;
+          else if(jenis.includes("mendesak") || jenis.includes("urgent")) document.getElementById('check-mendesak').checked = true;
+          else if(jenis.includes("terlambat")) document.getElementById('check-terlambat').checked = true;
+
+        } else {
+          alert(data.message || "ID Izin tidak ditemukan di database!");
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert("Gagal terhubung dengan server database Apps Script.");
+      });
+  }
+</script>
+</body>
+</html>
