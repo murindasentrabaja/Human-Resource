@@ -3,516 +3,453 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulir Lamaran Kerja - PT Murinda Sentra Baja</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <title>Formulir Izin Terpadu - PT Murinda Sentra Baja</title>
     <style>
-        :root {
-            --primary-color: #1e293b; 
-            --secondary-color: #475569; 
-            --text-dark: #0f172a;
+        :root { 
+            --primary: #1e3a8a; 
+            --primary-light: #3b82f6;
             --bg-body: #f8fafc;
+            --text-main: #1e293b;
             --border-color: #cbd5e1;
         }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
-        body { background-color: var(--bg-body); color: var(--text-dark); padding: 20px 10px; }
         
-        /* Kontainer Utama hanya untuk Form yang dicetak */
-        .container {
-            max-width: 840px;
-            margin: 0 auto;
-            background: #ffffff;
-            padding: 30px;
+        * { box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            background-color: var(--bg-body); 
+            padding: 30px 20px; 
+            color: var(--text-main); 
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .form-container { 
+            background: #fff; 
+            max-width: 850px; 
+            margin: auto; 
+            padding: 40px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
+            border-radius: 12px; 
+            border: 1px solid #e2e8f0;
+        }
+
+        /* HEADER SECTION */
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+            border-bottom: 3px double var(--primary);
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+        .header-logo-cell {
+            vertical-align: bottom;
+            padding-bottom: 8px;
+        }
+        .header-title-cell {
+            text-align: right;
+            vertical-align: bottom;
+            padding-bottom: 8px;
+        }
+        .company-title h2 { margin: 0; color: var(--primary); font-size: 22px; font-weight: 800; letter-spacing: 0.5px; line-height: 1.2; }
+        .company-title div { font-size: 13px; color: #64748b; margin-top: 2px; font-weight: 500; }
+        .doc-title-main { font-size: 18px; font-weight: bold; color: #1e293b; display: block; }
+        .doc-title-sub { font-size: 12px; font-weight: 500; color: #64748b; letter-spacing: 0.5px; display: block; margin-top: 2px; }
+        .doc-meta { font-size: 10px; color: #64748b; margin-top: 4px; }
+
+        /* SEARCH BAR */
+        .search-section {
+            background: #f1f5f9;
+            padding: 15px 20px;
             border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        }
-
-        /* Kontrol Halaman Cetak PDF Lembar A4 */
-        .pdf-page {
-            page-break-after: always;
-            page-break-inside: avoid;
-            clear: both;
-        }
-        .pdf-page:last-child { page-break-after: avoid; }
-
-        header {
+            margin-bottom: 25px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            border-bottom: 2px solid var(--primary-color);
-            padding-bottom: 6px;
-            margin-bottom: 12px;
+            gap: 15px;
         }
-        .logo-area h1 { font-size: 20px; color: var(--primary-color); font-weight: 800; letter-spacing: 0.5px; }
-        .logo-area p { font-size: 9px; color: var(--secondary-color); text-transform: uppercase; font-weight: bold; }
-        .form-meta { text-align: right; font-size: 10px; color: var(--secondary-color); line-height: 1.4; }
-        .main-title { text-align: center; margin: 5px 0 12px 0; }
-        .main-title h2 { font-size: 16px; text-transform: uppercase; color: var(--primary-color); letter-spacing: 0.5px; }
-
-        section { margin-bottom: 14px; }
-        .section-title {
-            font-size: 11px;
-            color: #ffffff;
-            background-color: var(--primary-color);
-            text-transform: uppercase;
-            padding: 4px 8px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            border-radius: 3px;
+        .search-group { flex: 1; display: flex; align-items: center; gap: 10px; }
+        .search-group label { margin-bottom: 0; white-space: nowrap; font-size: 14px; }
+        .search-input { 
+            flex: 1; 
+            padding: 10px 14px; 
+            border: 2px solid var(--border-color); 
+            border-radius: 6px; 
+            font-size: 14px; font-weight: 600; color: var(--primary);
+            transition: all 0.3s;
         }
-
-        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        
-        .form-group { margin-bottom: 5px; display: flex; flex-direction: column; }
-        .form-group.full-width { grid-column: span 2; }
-        
-        label { font-size: 10px; font-weight: 600; margin-bottom: 2px; color: var(--secondary-color); }
-        input[type="text"], input[type="date"], input[type="number"], select, textarea {
-            width: 100%; padding: 5px 8px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 11px; background-color: #f8fafc;
+        .search-input:focus { border-color: var(--primary-light); outline: none; background: #fff; }
+        .btn-search {
+            padding: 10px 24px; background: var(--primary); color: white; border: none; 
+            border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; transition: all 0.2s;
         }
+        .btn-search:hover { background: #172554; transform: translateY(-1px); }
 
-        .choice-group { display: flex; gap: 10px; margin-top: 2px; flex-wrap: wrap; }
-        .choice-item { display: flex; align-items: center; font-size: 10px; cursor: pointer; }
-        .choice-item input { margin-right: 4px; }
-
-        table { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 6px; }
-        th { background-color: #f1f5f9; color: var(--text-dark); font-weight: 600; padding: 4px; border: 1px solid var(--border-color); text-transform: uppercase; font-size: 9px; }
-        td { padding: 3px; border: 1px solid var(--border-color); }
-        table input, table select { padding: 2px; font-size: 11px; border: 1px solid transparent; background: transparent; width: 100%; }
-        table input:focus { border: 1px solid var(--primary-color); background: #fff; }
-
-        .sub-label { font-size: 10px; font-weight: bold; color: var(--primary-color); margin: 4px 0 2px 0; display: block; }
-        .declaration { background: #fffbeb; border: 1px solid #fef3c7; padding: 8px; border-radius: 4px; font-size: 10px; color: #92400e; margin: 8px 0; text-align: center; }
-        
-        /* Area luar form agar tidak merusak cetakan PDF */
-        .outer-action-area {
-            max-width: 840px;
-            margin: 15px auto 0 auto;
-            display: flex;
-            justify-content: flex-end;
-            padding: 0 10px;
+        /* SECTION HEADER */
+        .section-header { 
+            font-weight: 700; color: var(--primary); 
+            border-bottom: 2px solid #e2e8f0; 
+            margin: 25px 0 15px 0; padding-bottom: 6px; 
+            text-transform: uppercase; font-size: 12px; letter-spacing: 1px;
+            display: flex; align-items: center; gap: 8px;
         }
-        .submit-btn { background-color: #0f172a; color: white; border: none; padding: 12px 35px; font-size: 13px; font-weight: bold; border-radius: 5px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .submit-btn:hover { background-color: #1e293b; }
+        .section-header::before {
+            content: ''; display: inline-block; width: 4px; height: 15px; background: var(--primary-light); border-radius: 2px;
+        }
         
-        .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center; color: white; flex-direction: column; }
-        .spinner { border: 4px solid rgba(255,255,255,0.3); width: 35px; height: 35px; border-radius: 50%; border-left-color: #fff; animation: spin 1s linear infinite; margin-bottom: 10px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* FORM GRID & LAYOUTS */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 12px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 12px; }
+        .form-group { display: flex; flex-direction: column; }
+        
+        label { font-size: 12px; margin-bottom: 5px; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.3px; }
+        input[type="text"] { 
+            width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); 
+            border-radius: 6px; background-color: #fafafa; font-size: 13.5px; font-weight: 500; color: #334155;
+        }
+        input[type="text"]:focus { background-color: #fff; border-color: var(--primary-light); outline: none; }
+
+        /* CLASSIFICATION BOXES */
+        .grid-klasifikasi { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .klasifikasi-box { border: 1px solid #e2e8f0; padding: 16px; border-radius: 8px; background: #fff; }
+        .klasifikasi-box h4 { margin: 0 0 12px 0; font-size: 12px; color: var(--primary); border-bottom: 1px dashed #e2e8f0; padding-bottom: 6px; font-weight: 700; }
+        .checkbox-item { display: flex; align-items: center; font-size: 13px; margin-bottom: 8px; color: #334155; font-weight: 500; text-transform: none; cursor: pointer; }
+        .checkbox-item input { margin-right: 10px; width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
+
+        /* SIGNATURE SECTION */
+        .signature-table { width: 100%; border-collapse: collapse; margin-top: 35px; table-layout: fixed; }
+        .signature-table td { padding: 0 8px; }
+        .signature-table td:first-child { padding-left: 0; }
+        .signature-table td:last-child { padding-right: 0; }
+        .sig-container { border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; text-align: center; background: #fafafa; width: 100%; }
+        .sig-box { height: 65px; margin-bottom: 8px; }
+        .sig-label { font-size: 11px; font-weight: 700; color: #475569; border-top: 1px solid #e2e8f0; padding-top: 6px; text-transform: uppercase; }
+
+        /* SAFETY & RULES INFO */
+        .rules-box { background: #fff; border-left: 4px solid var(--primary); padding: 15px; margin-top: 30px; border-top: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; border-radius: 0 8px 8px 0; font-size: 12px; color: #475569; }
+        .rules-box strong { color: var(--primary); display: block; margin-bottom: 5px; }
+        
+        /* FOOTER INFO */
+        .footer-table { width: 100%; margin-top: 25px; padding-top: 12px; border-top: 1px solid #e2e8f0; font-size: 11px; color: #64748b; }
+        .footer-left { text-align: left; }
+        .footer-right { text-align: right; }
+
+        /* PRINT CONFIGURATION - MELEBARKAN SISI KIRI-KANAN & MENYEIMBANGKAN ATAS-BAWAH */
+        @media print {
+            @page { 
+                size: A4 portrait; 
+                margin: 20mm 22mm 20mm 22mm; /* Diperlebar (Kiri-Kanan 22mm) & Diberi ruang proporsional (Atas-Bawah 20mm) */
+            }
+            
+            html, body {
+                height: 100%;
+                background: none; 
+                padding: 0 !important; 
+                margin: 0 !important;
+                color: #000; 
+                font-size: 12px; /* Ukuran font ideal untuk keterbacaan penuh */
+            }
+
+            .form-container { 
+                box-shadow: none; 
+                border: none; 
+                max-width: 100%; 
+                width: 100%; 
+                height: 100%;
+                padding: 0 !important; 
+                margin: 0 !important;
+                background: transparent;
+            }
+
+            .no-print, .search-section { 
+                display: none !important; 
+            }
+
+            /* Header Section Spacing */
+            .header-table { 
+                margin-bottom: 18px; 
+                padding-bottom: 6px;
+                border-bottom: 2px solid #64748b;
+            }
+            .company-title h2 { font-size: 17px; }
+            .company-title div { font-size: 11.5px; }
+            .doc-title-main { font-size: 15px; }
+            .doc-title-sub { font-size: 11.5px; }
+            .doc-meta { font-size: 9.5px; margin-top: 2px; }
+
+            /* Melonggarkan Spacing Section Agar Mengisi Ruang Bawah Kertas */
+            .section-header { 
+                margin: 24px 0 12px 0; /* Menambah jarak vertikal antar bagian */
+                padding-bottom: 4px;
+                font-size: 12px;
+            }
+            
+            .grid-2, .grid-3 { 
+                gap: 15px; 
+                margin-bottom: 14px; /* Merenggangkan input box secara vertikal */
+            }
+            label { 
+                font-size: 10px; 
+                margin-bottom: 4px; 
+            }
+            input[type="text"] { 
+                border: none; 
+                border-bottom: 1px dashed #94a3b8; 
+                border-radius: 0; 
+                padding: 4px 0; 
+                background: transparent; 
+                font-size: 12.5px;
+            }
+
+            /* Jarak Area Klasifikasi */
+            .grid-klasifikasi { gap: 20px; }
+            .klasifikasi-box { padding: 14px 16px; }
+            .klasifikasi-box h4 { margin-bottom: 10px; padding-bottom: 5px; font-size: 11px; }
+            .checkbox-item { font-size: 11.5px; margin-bottom: 7px; }
+            .checkbox-item input { width: 14px; height: 14px; margin-right: 8px; }
+
+            /* Kolom Tanda Tangan Diperlebar & Dipertinggi Pas */
+            .signature-table { margin-top: 30px; }
+            .sig-container { padding: 10px; background: transparent; }
+            .sig-box { 
+                height: 85px; /* Ditambah tingginya agar space putih bawah terisi sempurna */
+                margin-bottom: 6px; 
+            }
+            .sig-label { font-size: 10.5px; padding-top: 5px; }
+
+            /* Kotak Aturan Keamanan */
+            .rules-box { 
+                margin-top: 30px; 
+                padding: 12px 15px; 
+                font-size: 11.5px; 
+                line-height: 1.6;
+            }
+            
+            /* Jarak Menuju Footer Akhir Kertas */
+            .footer-table { 
+                margin-top: 35px; 
+                padding-top: 10px; 
+                font-size: 10px; 
+            }
+        }
     </style>
 </head>
 <body>
 
-<div class="loading-overlay" id="loadingOverlay">
-    <div class="spinner"></div>
-    <div style="font-weight: bold;">Sedang Memproses & Mengunduh Form MSB...</div>
-</div>
-
-<div class="container" id="formContainer">
-    <form id="jobApplicationForm">
-
-        <div class="pdf-page">
-            <header>
-                <div class="logo-area">
-                    <h1>PT MURINDA SENTRA BAJA</h1>
-                    <p>Human Resource System</p>
+<div class="form-container">
+    <table class="header-table">
+        <tr>
+            <td class="header-logo-cell">
+                <div class="company-title">
+                    <img src="Murinda Logo.png" alt="Logo Murinda" style="height: 24px; width: auto; display: block; margin-bottom: 6px; object-fit: contain;">
+                    <h2>PT MURINDA SENTRA BAJA</h2>
+                    <div>Human Resource & Employee Services</div>
                 </div>
-                <div class="form-meta">
-                    <div><strong>No. Form :</strong> MSB/F-HR-002</div>
-                    <div><strong>Revisi &nbsp;&nbsp;&nbsp;:</strong> Rev.00</div>
+            </td>
+            <td class="header-title-cell">
+                <span class="doc-title-main">Formulir Izin Terpadu</span>
+                <span class="doc-title-sub">(GATE PASS SYSTEM)</span>
+                <div class="doc-meta">
+                    No. Form: MSB/F-HR-006 &nbsp;|&nbsp; Revisi: 00
                 </div>
-            </header>
+            </td>
+        </tr>
+    </table>
 
-            <div class="main-title">
-                <h2>FORMULIR LAMARAN KERJA</h2>
-            </div>
-
-            <section>
-                <div class="section-title">I. Posisi Yang Dilamar</div>
-                <div class="grid-3">
-                    <div class="form-group"><label>Pilihan Posisi 1</label><input type="text" id="posisi1" required></div>
-                    <div class="form-group"><label>Pilihan Posisi 2</label><input type="text" id="posisi2"></div>
-                    <div class="form-group"><label>Tanggal Pengajuan</label><input type="date" id="tgl_pengajuan" required></div>
-                </div>
-            </section>
-
-            <section>
-                <div class="section-title">II. Data Pribadi</div>
-                <div class="grid-2">
-                    <div class="form-group full-width"><label>Nama Lengkap</label><input type="text" id="nama_lengkap" required></div>
-                    <div class="form-group"><label>Tempat, Tanggal Lahir</label><input type="text" id="ttl" required></div>
-                    <div class="form-group">
-                        <label>Jenis Kelamin</label>
-                        <select id="jenis_kelamin" required>
-                            <option value="" disabled selected>-- Pilih --</option>
-                            <option value="Laki-Laki">Laki-Laki</option>
-                            <option value="Perempuan">Perempuan</option>
-                        </select>
-                    </div>
-                    <div class="form-group"><label>Agama</label><input type="text" id="agama" required></div>
-                    <div class="form-group">
-                        <label>Status Perkawinan</label>
-                        <div class="choice-group">
-                            <label class="choice-item"><input type="radio" name="status_perkawinan" value="Belum Menikah" checked> Belum Menikah</label>
-                            <label class="choice-item"><input type="radio" name="status_perkawinan" value="Menikah"> Menikah</label>
-                            <label class="choice-item"><input type="radio" name="status_perkawinan" value="Cerai"> Cerai</label>
-                        </div>
-                    </div>
-                    <div class="form-group full-width"><label>Alamat Domisili</label><textarea id="alamat" rows="2" required></textarea></div>
-                    <div class="form-group"><label>Nomor Kontak (HP)</label><input type="text" id="no_hp" required></div>
-                    <div class="form-group">
-                        <label>Status Tempat Tinggal</label>
-                        <div class="choice-group">
-                            <label class="choice-item"><input type="radio" name="status_tinggal" value="Milik Sendiri" checked> Milik Sendiri</label>
-                            <label class="choice-item"><input type="radio" name="status_tinggal" value="Sewa/Kontrak"> Sewa/Kontrak</label>
-                            <label class="choice-item"><input type="radio" name="status_tinggal" value="Rumah Dinas"> Rumah Dinas</label>
-                            <label class="choice-item"><input type="radio" name="status_tinggal" value="Orang Tua"> Orang Tua</label>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section>
-                <div class="section-title">III. Data Keluarga (Orang Tua dan Saudara Kandung)</div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="width: 12%;">Hubungan</th>
-                            <th>Nama Lengkap</th>
-                            <th style="width: 6%;">L/P</th>
-                            <th style="width: 7%;">Umur</th>
-                            <th>Pendidikan</th>
-                            <th>Pekerjaan / Instansi</th>
-                            <th>Keterangan</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td><strong>Ayah</strong></td><td><input type="text" name="f1_nama[]"></td><td><input type="text" name="f1_lp[]" value="L"></td><td><input type="number" name="f1_umur[]"></td><td><input type="text" name="f1_pnd[]"></td><td><input type="text" name="f1_pkrj[]"></td><td><input type="text" name="f1_ket[]"></td></tr>
-                        <tr><td><strong>Ibu</strong></td><td><input type="text" name="f1_nama[]"></td><td><input type="text" name="f1_lp[]" value="P"></td><td><input type="number" name="f1_umur[]"></td><td><input type="text" name="f1_pnd[]"></td><td><input type="text" name="f1_pkrj[]"></td><td><input type="text" name="f1_ket[]"></td></tr>
-                        <tr><td>Saudara 1</td><td><input type="text" name="f1_nama[]"></td><td><input type="text" name="f1_lp[]"></td><td><input type="number" name="f1_umur[]"></td><td><input type="text" name="f1_pnd[]"></td><td><input type="text" name="f1_pkrj[]"></td><td><input type="text" name="f1_ket[]"></td></tr>
-                        <tr><td>Saudara 2</td><td><input type="text" name="f1_nama[]"></td><td><input type="text" name="f1_lp[]"></td><td><input type="number" name="f1_umur[]"></td><td><input type="text" name="f1_pnd[]"></td><td><input type="text" name="f1_pkrj[]"></td><td><input type="text" name="f1_ket[]"></td></tr>
-                        <tr><td>Saudara 3</td><td><input type="text" name="f1_nama[]"></td><td><input type="text" name="f1_lp[]"></td><td><input type="number" name="f1_umur[]"></td><td><input type="text" name="f1_pnd[]"></td><td><input type="text" name="f1_pkrj[]"></td><td><input type="text" name="f1_ket[]"></td></tr>
-                        <tr><td>Saudara 4</td><td><input type="text" name="f1_nama[]"></td><td><input type="text" name="f1_lp[]"></td><td><input type="number" name="f1_umur[]"></td><td><input type="text" name="f1_pnd[]"></td><td><input type="text" name="f1_pkrj[]"></td><td><input type="text" name="f1_ket[]"></td></tr>
-                        <tr><td>Saudara 5</td><td><input type="text" name="f1_nama[]"></td><td><input type="text" name="f1_lp[]"></td><td><input type="number" name="f1_umur[]"></td><td><input type="text" name="f1_pnd[]"></td><td><input type="text" name="f1_pkrj[]"></td><td><input type="text" name="f1_ket[]"></td></tr>
-                    </tbody>
-                </table>
-            </section>
+    <div class="search-section">
+        <div class="search-group">
+            <label for="id-izin-input"><strong>MASUKKAN ID IZIN :</strong></label>
+            <input type="text" id="id-izin-input" class="search-input" placeholder="Masukkan ID Izin dari Sheet...">
         </div>
+        <button type="button" class="btn-search" onclick="fetchIzinData()">Cari & Sinkronisasi</button>
+    </div>
 
-        <div class="pdf-page">
-            <section style="margin-top: 10px;">
-                <div class="section-title">IV. Data Keluarga (Pasangan dan Anak)</div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="width: 15%;">Hubungan</th>
-                            <th>Nama Lengkap</th>
-                            <th style="width: 6%;">L/P</th>
-                            <th style="width: 8%;">Umur</th>
-                            <th>Pendidikan</th>
-                            <th>Pekerjaan / Instansi</th>
-                            <th>Keterangan</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td><strong>Suami / Istri</strong></td><td><input type="text" name="f2_nama[]"></td><td><input type="text" name="f2_lp[]"></td><td><input type="number" name="f2_umur[]"></td><td><input type="text" name="f2_pnd[]"></td><td><input type="text" name="f2_pkrj[]"></td><td><input type="text" name="f2_ket[]"></td></tr>
-                        <tr><td>Anak 1</td><td><input type="text" name="f2_nama[]"></td><td><input type="text" name="f2_lp[]"></td><td><input type="number" name="f2_umur[]"></td><td><input type="text" name="f2_pnd[]"></td><td><input type="text" name="f2_pkrj[]"></td><td><input type="text" name="f2_ket[]"></td></tr>
-                        <tr><td>Anak 2</td><td><input type="text" name="f2_nama[]"></td><td><input type="text" name="f2_lp[]"></td><td><input type="number" name="f2_umur[]"></td><td><input type="text" name="f2_pnd[]"></td><td><input type="text" name="f2_pkrj[]"></td><td><input type="text" name="f2_ket[]"></td></tr>
-                        <tr><td>Anak 3</td><td><input type="text" name="f2_nama[]"></td><td><input type="text" name="f2_lp[]"></td><td><input type="number" name="f2_umur[]"></td><td><input type="text" name="f2_pnd[]"></td><td><input type="text" name="f2_pkrj[]"></td><td><input type="text" name="f2_ket[]"></td></tr>
-                    </tbody>
-                </table>
-            </section>
-
-            <section>
-                <div class="section-title">V. Latar Belakang Pendidikan</div>
-                <span class="sub-label">A. Pendidikan Formal (Dua Tingkat Terakhir)</span>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Nama Institusi / Sekolah</th>
-                            <th>Lokasi / Kota</th>
-                            <th>Periode (Tahun - Tahun)</th>
-                            <th>Jurusan / Bidang Ilmu</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td><input type="text" name="edu_nama[]" required></td><td><input type="text" name="edu_lokasi[]" required></td><td><input type="text" name="edu_periode[]" required></td><td><input type="text" name="edu_jurusan[]" required></td></tr>
-                        <tr><td><input type="text" name="edu_nama[]" required></td><td><input type="text" name="edu_lokasi[]" required></td><td><input type="text" name="edu_periode[]" required></td><td><input type="text" name="edu_jurusan[]" required></td></tr>
-                    </tbody>
-                </table>
-
-                <span class="sub-label">B. Pelatihan / Sertifikasi / Kursus (Durasi Minimal 1 Minggu)</span>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Nama Pelatihan / Sertifikasi</th>
-                            <th>Penyelenggara</th>
-                            <th>Lokasi / Kota</th>
-                            <th>Tahun</th>
-                            <th>Durasi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td><input type="text" name="cert_nama[]"></td><td><input type="text" name="cert_vendor[]"></td><td><input type="text" name="cert_kota[]"></td><td><input type="text" name="cert_thn[]"></td><td><input type="text" name="cert_durasi[]"></td></tr>
-                        <tr><td><input type="text" name="cert_nama[]"></td><td><input type="text" name="cert_vendor[]"></td><td><input type="text" name="cert_kota[]"></td><td><input type="text" name="cert_thn[]"></td><td><input type="text" name="cert_durasi[]"></td></tr>
-                    </tbody>
-                </table>
-            </section>
-
-            <section>
-                <div class="section-title">VI. Informasi Tambahan</div>
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label>Sumber Pembiayaan Pendidikan Tinggi</label>
-                        <div class="choice-group">
-                            <label class="choice-item"><input type="radio" name="biaya_kuliah" value="Mandiri" checked> Mandiri</label>
-                            <label class="choice-item"><input type="radio" name="biaya_kuliah" value="Keluarga"> Keluarga</label>
-                            <label class="choice-item"><input type="radio" name="biaya_kuliah" value="Beasiswa"> Beasiswa</label>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Kemampuan Bahasa Asing</label>
-                        <div class="choice-group">
-                            <label class="choice-item"><input type="checkbox" name="bahasa[]" value="Fasih"> Fasih (Lisan & Tulisan)</label>
-                            <label class="choice-item"><input type="checkbox" name="bahasa[]" value="Dasar"> Pemahaman Dasar</label>
-                        </div>
-                    </div>
-                    <div class="form-group full-width"><label>Rencana Pengembangan Diri / Pendidikan Lanjutan</label><textarea id="rencana_studi" rows="2"></textarea></div>
-                </div>
-            </section>
+    <div class="section-header">Informasi Personel & Karyawan</div>
+    <div class="grid-2">
+        <div class="form-group">
+            <label>ID Karyawan (NIK)</label>
+            <input type="text" id="nik-input" readonly>
         </div>
-
-        <div class="pdf-page">
-            <section style="margin-top: 10px;">
-                <div class="section-title">VII. Riwayat Pekerjaan</div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Perusahaan / Instansi</th>
-                            <th>Lokasi / Kota</th>
-                            <th>Posisi / Jabatan</th>
-                            <th>Mulai (Bln/Thn)</th>
-                            <th>Selesai (Bln/Thn)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td><input type="text" name="job_corp[]"></td><td><input type="text" name="job_city[]"></td><td><input type="text" name="job_pos[]"></td><td><input type="text" name="job_start[]"></td><td><input type="text" name="job_end[]"></td></tr>
-                        <tr><td colspan="5" style="background:#f8fafc;"><label style="font-size:10px; font-weight:normal;">Alasan Pengunduran Diri :</label><input type="text" name="job_reason[]"></td></tr>
-                        <tr><td><input type="text" name="job_corp[]"></td><td><input type="text" name="job_city[]"></td><td><input type="text" name="job_pos[]"></td><td><input type="text" name="job_start[]"></td><td><input type="text" name="job_end[]"></td></tr>
-                        <tr><td colspan="5" style="background:#f8fafc;"><label style="font-size:10px; font-weight:normal;">Alasan Pengunduran Diri :</label><input type="text" name="job_reason[]"></td></tr>
-                    </tbody>
-                </table>
-                <div class="grid-2">
-                    <div class="form-group"><label>Motivasi Melamar Kerja</label><textarea id="motivasi" rows="2" required></textarea></div>
-                    <div class="form-group"><label>Sumber Informasi Lowongan Kerja</label><input type="text" id="sumber_info" required></div>
-                </div>
-            </section>
-
-            <section>
-                <div class="section-title">VIII. Referensi Profesional</div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Nama Lengkap</th>
-                            <th>Kontak (HP / Email)</th>
-                            <th>Hubungan / Jabatan</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td><input type="text" name="ref_nama[]"></td><td><input type="text" name="ref_kontak[]"></td><td><input type="text" name="ref_hub[]"></td></tr>
-                        <tr><td><input type="text" name="ref_nama[]"></td><td><input type="text" name="ref_kontak[]"></td><td><input type="text" name="ref_hub[]"></td></tr>
-                    </tbody>
-                </table>
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label>Izin Menghubungi Referensi?</label>
-                        <div class="choice-group">
-                            <label class="choice-item"><input type="radio" name="izin_ref" value="Ya" checked> Ya</label>
-                            <label class="choice-item"><input type="radio" name="izin_ref" value="Tidak"> Tidak</label>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Memiliki Relasi di Perusahaan Ini?</label>
-                        <div class="choice-group">
-                            <label class="choice-item"><input type="radio" name="ada_relasi" value="Ya"> Ya</label>
-                            <label class="choice-item"><input type="radio" name="ada_relasi" value="Tidak" checked> Tidak</label>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section>
-                <div class="section-title">IX. Aktivitas Sosial, Organisasi & Kegemaran</div>
-                <table style="margin-bottom: 5px;">
-                    <thead>
-                        <tr>
-                            <th style="width: 12%;">Tahun</th>
-                            <th>Nama Aktivitas / Kegiatan</th>
-                            <th>Organisasi / Perkumpulan</th>
-                            <th>Jabatan</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td><input type="text" name="org_thn[]"></td><td><input type="text" name="org_act[]"></td><td><input type="text" name="org_nama[]"></td><td><input type="text" name="org_pos[]"></td></tr>
-                    </tbody>
-                </table>
-                <div class="grid-3" style="margin-bottom: 5px;">
-                    <div class="form-group"><label>Intensitas Tinggi Baca (Topik)</label><input type="text" name="baca_tinggi"></div>
-                    <div class="form-group"><label>Intensitas Sedang Baca (Topik)</label><input type="text" name="baca_sedang"></div>
-                    <div class="form-group"><label>Intensitas Rendah Baca (Topik)</label><input type="text" name="baca_rendah"></div>
-                </div>
-                <div class="grid-2" style="background: #f8fafc; padding: 6px; border: 1px dashed var(--border-color); border-radius: 4px;">
-                    <div class="form-group"><label>Langganan Media Massa - Surat Kabar</label><input type="text" name="media_koran"></div>
-                    <div class="form-group"><label>Langganan Media Massa - Majalah</label><input type="text" name="media_majalah"></div>
-                </div>
-            </section>
+        <div class="form-group">
+            <label>Nama Lengkap</label>
+            <input type="text" id="nama-input" readonly>
         </div>
-
-        <div class="pdf-page">
-            <section style="margin-top: 10px;">
-                <div class="section-title">X. Keterangan Lain-Lain</div>
-                <div class="grid-3">
-                    <div class="form-group">
-                        <label>Fasilitas Kendaraan Sehari-hari</label>
-                        <div class="choice-group">
-                            <label class="choice-item"><input type="radio" name="fasilitas_kendaraan" value="Milik Sendiri" checked> Milik Sendiri</label>
-                            <label class="choice-item"><input type="radio" name="fasilitas_kendaraan" value="Dinas/Umum"> Dinas/Umum</label>
-                        </div>
-                    </div>
-                    <div class="form-group"><label>Jenis SIM yang Dimiliki</label><input type="text" id="sim"></div>
-                    <div class="form-group"><label>Riwayat Kesehatan (Sering Diderita)</label><input type="text" name="sakit_sering"></div>
-                </div>
-                
-                <div class="form-group" style="margin-top: 4px;"><label>Riwayat Penyakit Berat / Perawatan Medis Intensif (Rawat Inap)</label></div>
-                <div class="grid-4" style="background:#f8fafc; padding:5px; border-radius:4px; border:1px solid var(--border-color); margin-bottom: 6px;">
-                    <div class="form-group"><label>Waktu Kejadian</label><input type="text" name="medis_waktu"></div>
-                    <div class="form-group"><label>Tempat Perawatan</label><input type="text" name="medis_tempat"></div>
-                    <div class="form-group"><label>Jenis Penyakit</label><input type="text" name="medis_jenis"></div>
-                    <div class="form-group"><label>Keterangan</label><input type="text" name="medis_ket"></div>
-                </div>
-
-                <div class="form-group"><label>Riwayat Pemeriksaan Psikologis (Psikotes) Sebelumnya</label></div>
-                <div class="grid-3" style="background:#f8fafc; padding:5px; border-radius:4px; border:1px solid var(--border-color);">
-                    <div class="form-group"><label>Waktu Pemeriksaan</label><input type="text" name="psiko_waktu"></div>
-                    <div class="form-group"><label>Penyelenggara</label><input type="text" name="psiko_vendor"></div>
-                    <div class="form-group"><label>Tujuan Pemeriksaan</label><input type="text" name="psiko_tujuan"></div>
-                </div>
-            </section>
-
-            <section>
-                <div class="section-title">XI. Informasi Penawaran Dan Negosiasi</div>
-                <div class="grid-2">
-                    <div style="background: #ffffff; padding: 6px; border: 1px solid var(--border-color); border-radius: 4px;">
-                        <span style="font-weight: bold; font-size: 10px; display:block; margin-bottom:4px; color:var(--primary-color);">1. Riwayat Kompensasi Perusahaan Terakhir</span>
-                        <div class="grid-2">
-                            <div class="form-group"><label>Gaji Pokok (/Bln)</label><input type="text" name="last_gapok"></div>
-                            <div class="form-group"><label>Tunj. Makan (/Hari)</label><input type="text" name="last_makan"></div>
-                        </div>
-                        <div class="form-group" style="margin-top: 2px;">
-                            <label>Tunjangan Transportasi :</label>
-                            <div class="choice-group">
-                                <label class="choice-item"><input type="checkbox" name="last_trans[]" value="Inventaris"> Inventaris</label>
-                                <label class="choice-item"><input type="checkbox" name="last_trans[]" value="Jemputan"> Jemputan</label>
-                                <label class="choice-item"><input type="checkbox" name="last_trans[]" value="Tunai"> Tunai</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="background: #ffffff; padding: 6px; border: 1px solid var(--border-color); border-radius: 4px;">
-                        <span style="font-weight: bold; font-size: 10px; display:block; margin-bottom:4px; color:var(--primary-color);">2. Ekspektasi Kompensasi yang Diharapkan</span>
-                        <div class="grid-2">
-                            <div class="form-group"><label>Gaji Pokok (/Bln)</label><input type="text" id="exp_gapok" name="exp_gapok" required></div>
-                            <div class="form-group"><label>Tunj. Makan (/Hari)</label><input type="text" name="exp_makan"></div>
-                        </div>
-                        <div class="form-group" style="margin-top: 2px;">
-                            <label>Tunjangan Transportasi :</label>
-                            <div class="choice-group">
-                                <label class="choice-item"><input type="checkbox" name="exp_trans[]" value="Inventaris"> Inventaris</label>
-                                <label class="choice-item"><input type="checkbox" name="exp_trans[]" value="Jemputan"> Jemputan</label>
-                                <label class="choice-item"><input type="checkbox" name="exp_trans[]" value="Tunai"> Tunai</label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group" style="margin-top: 5px;">
-                    <label>Apabila disetujui, kapan tanggal efektif Anda siap bergabung?</label>
-                    <input type="text" id="join_date" required placeholder="Contoh: Segera / 1 Bulan Notice">
-                </div>
-            </section>
-
-            <div class="declaration">
-                Demikian pernyataan ini saya buat dengan sebenar-benarnya dan dapat dipertanggungjawabkan sesuai dengan kondisi yang ada.
-            </div>
-
-            <div class="footer-action" style="display: flex; justify-content: flex-start; margin-top: 10px;">
-                <div class="form-group" style="width: 240px; margin-bottom:0;">
-                    <label>Nama Lengkap Pelamar:</label>
-                    <input type="text" id="signature_name" required style="border-bottom: 2px solid var(--primary-color); border-top:0; border-left:0; border-right:0; border-radius:0; padding:2px 0; font-weight:bold; background: transparent;">
-                </div>
-            </div>
+    </div>
+    <div class="grid-2">
+        <div class="form-group">
+            <label>Departemen</label>
+            <input type="text" id="dept-input" readonly>
         </div>
+        <div class="form-group">
+            <label>Jabatan / Posisi</label>
+            <input type="text" id="jabatan-input" readonly>
+        </div>
+    </div>
 
-    </form>
-</div>
+    <div class="section-header">Klasifikasi Ketidakhadiran / Jenis Izin</div>
+    <div class="grid-klasifikasi">
+        <div class="klasifikasi-box">
+            <h4>A. IZIN HARIAN (TIDAK MASUK)</h4>
+            <label class="checkbox-item"><input type="checkbox" id="check-cuti"> Cuti Tahunan (Annual Leave)</label>
+            <label class="checkbox-item"><input type="checkbox" id="check-sakit"> Izin Sakit (Medical - Lampirkan SKD)</label>
+            <label class="checkbox-item"><input type="checkbox" id="check-duka"> Duka / Kemalangan (Compassionate)</label>
+        </div>
+        <div class="klasifikasi-box">
+            <h4>B. IZIN KELUAR (GATE PASS)</h4>
+            <label class="checkbox-item"><input type="checkbox" id="check-dinas"> Dinas Luar (Work Related)</label>
+            <label class="checkbox-item"><input type="checkbox" id="check-pribadi"> Izin Pribadi (Meninggalkan Kantor)</label>
+            <label class="checkbox-item"><input type="checkbox" id="check-pulang"> Pulang Awal (Early Leave)</label>
+            <label class="checkbox-item"><input type="checkbox" id="check-mendesak"> Keperluan Mendesak (Urgent)</label>
+            <label class="checkbox-item"><input type="checkbox" id="check-terlambat"> Datang Terlambat (Late Arrival)</label>
+        </div>
+    </div>
 
-<div class="outer-action-area">
-    <button type="button" onclick="executeProsesForm()" class="submit-btn">KIRIM LAMARAN & WHATSAPP</button>
+    <div class="section-header">Rincian Waktu, Durasi & Alasan</div>
+    <div class="grid-3">
+        <div class="form-group">
+            <label>Tanggal Mulai</label>
+            <input type="text" id="tgl-mulai-input" readonly>
+        </div>
+        <div class="form-group">
+            <label>Tanggal Selesai</label>
+            <input type="text" id="tgl-selesai-input" readonly>
+        </div>
+        <div class="form-group">
+            <label>Durasi (Hari)</label>
+            <input type="text" id="durasi-input" readonly>
+        </div>
+    </div>
+
+    <div class="grid-3">
+        <div class="form-group">
+            <label>Jam Keluar</label>
+            <input type="text" id="jam-keluar-input" readonly>
+        </div>
+        <div class="form-group">
+            <label>Jam Kembali</label>
+            <input type="text" id="jam-kembali-input" readonly>
+        </div>
+        <div class="form-group">
+            <label>Kembali ke Kantor?</label>
+            <input type="text" id="kembali-input" readonly>
+        </div>
+    </div>
+
+    <div class="grid-2" style="margin-top: 5px;">
+        <div class="form-group">
+            <label>Keterangan / Alasan Terperinci</label>
+            <input type="text" id="keterangan-input" readonly>
+        </div>
+        <div class="form-group">
+            <label>Serah Terima Tugas (Handover Ke)</label>
+            <input type="text" id="handover-input" readonly>
+        </div>
+    </div>
+
+    <table class="signature-table">
+        <tr>
+            <td>
+                <div class="sig-container">
+                    <div class="sig-box"></div>
+                    <div class="sig-label">Pemohon</div>
+                </div>
+            </td>
+            <td>
+                <div class="sig-container">
+                    <div class="sig-box"></div>
+                    <div class="sig-label">Atasan Langsung</div>
+                </div>
+            </td>
+            <td>
+                <div class="sig-container">
+                    <div class="sig-box"></div>
+                    <div class="sig-label">HR Department</div>
+                </div>
+            </td>
+            <td>
+                <div class="sig-container">
+                    <div class="sig-box"></div>
+                    <div class="sig-label">Security Gate</div>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <div class="rules-box">
+        <strong>Prosedur Keamanan & Ketertiban Gerbang:</strong>
+        <ol style="margin: 0; padding-left: 20px; line-height: 1.6;">
+            <li>Pengajuan izin harian wajib dilakukan H-3, kecuali kondisi darurat medis/sakit.</li>
+            <li>Formulir Gate Pass harus disetujui Atasan dan divalidasi fisik oleh Security di pos depan.</li>
+            <li>Tanpa dokumen ini, pihak Security berhak menahan karyawan untuk keluar/masuk area pabrik PT Murinda Sentra Baja.</li>
+        </ol>
+    </div>
+
+    <table class="footer-table">
+        <tr>
+            <td class="footer-left"><strong>Validasi HR System:</strong> Dokumen terintegrasi otomatis dengan ERP Database PT Murinda Sentra Baja.</td>
+            <td class="footer-right"><strong>Waktu Cetak:</strong> <span id="print-time"></span></td>
+        </tr>
+    </table>
+
+    <div style="text-align: center; margin-top: 25px;" class="no-print">
+        <button onclick="window.print()" style="padding: 12px 35px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.2s;">Cetak Dokumen / Simpan PDF</button>
+    </div>
 </div>
 
 <script>
-    function executeProsesForm() {
-        // Validasi form HTML5 secara manual sebelum generate
-        const formElement = document.getElementById('jobApplicationForm');
-        if (!formElement.checkValidity()) {
-            formElement.reportValidity();
-            return;
+  var now = new Date();
+  var formatWaktu = now.toLocaleString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  document.getElementById('print-time').innerText = formatWaktu + ' WIB';
+
+  function clearCheckboxes() {
+    const checkboxes = ['check-cuti', 'check-sakit', 'check-duka', 'check-dinas', 'check-pribadi', 'check-pulang', 'check-mendesak', 'check-terlambat'];
+    checkboxes.forEach(id => document.getElementById(id).checked = false);
+  }
+
+  function fetchIzinData() {
+    var idIzin = document.getElementById('id-izin-input').value.trim();
+    if(!idIzin) { alert("Silakan isi ID Izin terlebih dahulu!"); return; }
+    
+    var url = "https://script.google.com/macros/s/AKfycbz0bjRuLCcXDmiQIL5xGtP0hwLkGeUllZYHGdXAg5S7xiWKiWSkU3w-B3EJAJtNktdVhw/exec" + "?idIzin=" + idIzin;
+
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        if(data.success === true) {
+          clearCheckboxes();
+
+          document.getElementById('nik-input').value = data.nik || "";
+          document.getElementById('nama-input').value = data.nama || "";
+          document.getElementById('jabatan-input').value = data.jabatan || "";
+          document.getElementById('dept-input').value = data.dept || "";
+          document.getElementById('tgl-mulai-input').value = data.tglMulai || "";
+          document.getElementById('tgl-selesai-input').value = data.tglSelesai || "";
+          document.getElementById('durasi-input').value = data.durasi ?? "";
+          document.getElementById('jam-keluar-input').value = data.jamKeluar || "-";
+          document.getElementById('jam-kembali-input').value = data.jamKembali || "-";
+          document.getElementById('kembali-input').value = data.kembali || "";
+          document.getElementById('keterangan-input').value = data.keterangan || "";
+          document.getElementById('handover-input').value = data.handover || "-";
+
+          var jenis = data.jenisIzin ? data.jenisIzin.trim().toLowerCase() : "";
+          
+          if(jenis.includes("cuti tahunan")) document.getElementById('check-cuti').checked = true;
+          else if(jenis.includes("sakit")) document.getElementById('check-sakit').checked = true;
+          else if(jenis.includes("duka") || jenis.includes("kemalangan")) document.getElementById('check-duka').checked = true;
+          else if(jenis.includes("dinas luar")) document.getElementById('check-dinas').checked = true;
+          else if(jenis.includes("izin pribadi")) document.getElementById('check-pribadi').checked = true;
+          else if(jenis.includes("pulang awal")) document.getElementById('check-pulang').checked = true;
+          else if(jenis.includes("mendesak") || jenis.includes("urgent")) document.getElementById('check-mendesak').checked = true;
+          else if(jenis.includes("terlambat")) document.getElementById('check-terlambat').checked = true;
+
+        } else {
+          alert(data.message || "ID Izin tidak ditemukan di database!");
         }
-
-        const overlay = document.getElementById('loadingOverlay');
-        overlay.style.display = 'flex';
-        
-        const element = document.getElementById('formContainer');
-        
-        // Ambil data penting pelamar untuk kebutuhan teks WhatsApp hrd
-        const namaPelamar = document.getElementById('nama_lengkap').value || 'Pelamar';
-        const nomorPelamar = document.getElementById('no_hp').value || '-';
-        const posisiDilamar = document.getElementById('posisi1').value || '-';
-        const ekspektasiGaji = document.getElementById('exp_gapok').value || '-';
-        
-        const opt = {
-            margin:       [8, 10, 8, 10],
-            filename:     'Form_Lamaran_MSB_' + namaPelamar.replace(/\s+/g, '_') + '.pdf',
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true, logging: false },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-
-        html2pdf().set(opt).from(element).toPdf().output('blob').then(function(pdfBlob) {
-            overlay.style.display = 'none';
-
-            // 1. Eksekusi Otomatis Unduh Berkas PDF Resmi ke Perangkat
-            const downloadUrl = URL.createObjectURL(pdfBlob);
-            const a = document.createElement('a');
-            a.href = downloadUrl;
-            a.download = opt.filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-
-            // 2. Alur Integrasi Kirim Ringkasan Teks Profesional ke WhatsApp HRD MSB
-            const nomorWA_HRD = "6281295697672"; // Masukkan nomor WhatsApp HRD tujuan Anda disini
-            
-            const pesanTeks = `Halo HRD PT Murinda Sentra Baja,\n\nBerikut saya kirimkan konfirmasi data pengisian *Formulir Lamaran Kerja Resmi Digital (MSB/F-HR-002)*.\n\n*Ringkasan Profil Pelamar:*\n• *Nama Lengkap:* ${namaPelamar}\n• *No. Kontak:* ${nomorPelamar}\n• *Posisi Dilamar:* ${posisiDilamar}\n• *Ekspektasi Kompensasi:* Rp ${ekspektasiGaji}/Bulan\n\nDokumen cetak fisik PDF 4 Halaman penuh (*${opt.filename}*) telah sukses diunduh secara otomatis. Saya siap melampirkan berkas dokumen tersebut bersama pesan konfirmasi ini. Terima kasih.`;
-            
-            const linkWhatsApp = `https://api.whatsapp.com/send?phone=${nomorWA_HRD}&text=${encodeURIComponent(pesanTeks)}`;
-            
-            alert('Sukses!\n\n1. Dokumen PDF (4 Halaman Pas & Rapi) berhasil diunduh ke perangkat Anda.\n2. Klik OK untuk langsung meneruskan draf ringkasan lamaran ke WhatsApp HRD.');
-            
-            window.open(linkWhatsApp, '_blank');
-        });
-    }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert("Gagal terhubung dengan server database Apps Script.");
+      });
+  }
 </script>
-
 </body>
 </html>
