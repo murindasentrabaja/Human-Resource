@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulir Izin Terpadu - PT Murinda Sentra Baja</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <style>
         :root { 
             --primary: #1e3a8a; 
@@ -34,23 +35,10 @@
             border: 1px solid #e2e8f0;
         }
 
-        /* HEADER SECTION */
-        .header-table {
-            width: 100%;
-            border-collapse: collapse;
-            border-bottom: 3px double var(--primary);
-            padding-bottom: 15px;
-            margin-bottom: 30px;
-        }
-        .header-logo-cell {
-            vertical-align: bottom;
-            padding-bottom: 8px;
-        }
-        .header-title-cell {
-            text-align: right;
-            vertical-align: bottom;
-            padding-bottom: 8px;
-        }
+        /* HEADER */
+        .header-table { width: 100%; border-collapse: collapse; border-bottom: 3px double var(--primary); padding-bottom: 15px; margin-bottom: 30px; }
+        .header-logo-cell { vertical-align: bottom; padding-bottom: 8px; }
+        .header-title-cell { text-align: right; vertical-align: bottom; padding-bottom: 8px; }
         .company-title h2 { margin: 0; color: var(--primary); font-size: 22px; font-weight: 800; letter-spacing: 0.5px; line-height: 1.2; }
         .company-title div { font-size: 13px; color: #64748b; margin-top: 2px; font-weight: 500; }
         .doc-title-main { font-size: 18px; font-weight: bold; color: #1e293b; display: block; }
@@ -58,31 +46,19 @@
         .doc-meta { font-size: 10px; color: #64748b; margin-top: 4px; }
 
         /* SEARCH BAR */
-        .search-section {
-            background: #f1f5f9;
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin-bottom: 25px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
+        .search-section { background: #f1f5f9; padding: 15px 20px; border-radius: 8px; margin-bottom: 25px; display: flex; align-items: center; gap: 15px; }
         .search-group { flex: 1; display: flex; align-items: center; gap: 10px; }
         .search-group label { margin-bottom: 0; white-space: nowrap; font-size: 14px; }
         .search-input { 
-            flex: 1; 
-            padding: 10px 14px; 
-            border: 2px solid var(--border-color); 
-            border-radius: 6px; 
-            font-size: 14px; font-weight: 600; color: var(--primary);
-            transition: all 0.3s;
+            flex: 1; padding: 10px 14px; border: 2px solid var(--border-color); 
+            border-radius: 6px; font-size: 14px; font-weight: 600; color: var(--primary);
+            transition: all 0.3s; background: #fff;
         }
-        .search-input:focus { border-color: var(--primary-light); outline: none; background: #fff; }
-        .btn-search {
-            padding: 10px 24px; background: var(--primary); color: white; border: none; 
-            border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; transition: all 0.2s;
-        }
-        .btn-search:hover { background: #172554; transform: translateY(-1px); }
+        .search-input:focus { border-color: var(--primary-light); outline: none; }
+        .status-pill { font-size: 11px; padding: 6px 12px; border-radius: 999px; font-weight: 600; white-space: nowrap; background: #e2e8f0; color: #475569; transition: all .25s; }
+        .status-pill.loading { background: #fef3c7; color: #92400e; }
+        .status-pill.success { background: #dcfce7; color: #166534; }
+        .status-pill.error { background: #fee2e2; color: #991b1b; }
 
         /* SECTION HEADER */
         .section-header { 
@@ -96,7 +72,7 @@
             content: ''; display: inline-block; width: 4px; height: 15px; background: var(--primary-light); border-radius: 2px;
         }
         
-        /* FORM GRID & LAYOUTS */
+        /* FORM GRID */
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 12px; }
         .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 12px; }
         .form-group { display: flex; flex-direction: column; }
@@ -117,124 +93,52 @@
 
         /* SIGNATURE SECTION */
         .signature-table { width: 100%; border-collapse: collapse; margin-top: 35px; table-layout: fixed; }
-        .signature-table td { padding: 0 8px; }
+        .signature-table td { padding: 0 8px; vertical-align: top; }
         .signature-table td:first-child { padding-left: 0; }
         .signature-table td:last-child { padding-right: 0; }
-        .sig-container { border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; text-align: center; background: #fafafa; width: 100%; }
-        .sig-box { 
-            height: 75px; 
-            margin-bottom: 8px; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-        }
-        .sig-label { font-size: 11px; font-weight: 700; color: #475569; border-top: 1px solid #e2e8f0; padding-top: 6px; text-transform: uppercase; }
+        .sig-container { border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; text-align: center; background: #fafafa; width: 100%; min-height: 165px; display: flex; flex-direction: column; }
+        .sig-stamp-text { font-size: 9px; color: #475569; font-style: italic; line-height: 1.25; margin-bottom: 4px; min-height: 24px; }
+        .sig-stamp-name { font-size: 10.5px; font-weight: 700; color: #1e293b; margin-bottom: 4px; min-height: 14px; }
+        .sig-qr { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 80px; }
+        .sig-qr img, .sig-qr canvas { max-width: 80px; max-height: 80px; object-fit: contain; }
+        .sig-qr.placeholder { color: #cbd5e1; font-size: 10px; }
+        .sig-label { font-size: 11px; font-weight: 700; color: #475569; border-top: 1px solid #e2e8f0; padding-top: 6px; text-transform: uppercase; margin-top: 4px; }
 
         /* SAFETY & RULES INFO */
         .rules-box { background: #fff; border-left: 4px solid var(--primary); padding: 15px; margin-top: 30px; border-top: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; border-radius: 0 8px 8px 0; font-size: 12px; color: #475569; }
         .rules-box strong { color: var(--primary); display: block; margin-bottom: 5px; }
         
-        /* FOOTER INFO */
+        /* FOOTER */
         .footer-table { width: 100%; margin-top: 25px; padding-top: 12px; border-top: 1px solid #e2e8f0; font-size: 11px; color: #64748b; }
         .footer-left { text-align: left; }
         .footer-right { text-align: right; }
 
-        /* PRINT CONFIGURATION */
+        /* PRINT */
         @media print {
-            @page { 
-                size: A4 portrait; 
-                margin: 20mm 22mm 20mm 22mm; 
-            }
-            
-            html, body {
-                height: 100%;
-                background: none; 
-                padding: 0 !important; 
-                margin: 0 !important;
-                color: #000; 
-                font-size: 12px; 
-            }
-
-            .form-container { 
-                box-shadow: none; 
-                border: none; 
-                max-width: 100%; 
-                width: 100%; 
-                height: 100%;
-                padding: 0 !important; 
-                margin: 0 !important;
-                background: transparent;
-            }
-
-            .no-print, .search-section { 
-                display: none !important; 
-            }
-
-            .header-table { 
-                margin-bottom: 18px; 
-                padding-bottom: 6px;
-                border-bottom: 2px solid #64748b;
-            }
+            @page { size: A4 portrait; margin: 20mm 22mm 20mm 22mm; }
+            html, body { height: 100%; background: none; padding: 0 !important; margin: 0 !important; color: #000; font-size: 12px; }
+            .form-container { box-shadow: none; border: none; max-width: 100%; width: 100%; height: 100%; padding: 0 !important; margin: 0 !important; background: transparent; }
+            .no-print, .search-section { display: none !important; }
+            .header-table { margin-bottom: 18px; padding-bottom: 6px; border-bottom: 2px solid #64748b; }
             .company-title h2 { font-size: 17px; }
             .company-title div { font-size: 11.5px; }
             .doc-title-main { font-size: 15px; }
             .doc-title-sub { font-size: 11.5px; }
             .doc-meta { font-size: 9.5px; margin-top: 2px; }
-
-            .section-header { 
-                margin: 24px 0 12px 0; 
-                padding-bottom: 4px;
-                font-size: 12px;
-            }
-            
-            .grid-2, .grid-3 { 
-                gap: 15px; 
-                margin-bottom: 14px; 
-            }
-            label { 
-                font-size: 10px; 
-                margin-bottom: 4px; 
-            }
-            input[type="text"] { 
-                border: none; 
-                border-bottom: 1px dashed #94a3b8; 
-                border-radius: 0; 
-                padding: 4px 0; 
-                background: transparent; 
-                font-size: 12.5px;
-            }
-
+            .section-header { margin: 24px 0 12px 0; padding-bottom: 4px; font-size: 12px; }
+            .grid-2, .grid-3 { gap: 15px; margin-bottom: 14px; }
+            label { font-size: 10px; margin-bottom: 4px; }
+            input[type="text"] { border: none; border-bottom: 1px dashed #94a3b8; border-radius: 0; padding: 4px 0; background: transparent; font-size: 12.5px; }
             .grid-klasifikasi { gap: 20px; }
             .klasifikasi-box { padding: 14px 16px; }
             .klasifikasi-box h4 { margin-bottom: 10px; padding-bottom: 5px; font-size: 11px; }
             .checkbox-item { font-size: 11.5px; margin-bottom: 7px; }
             .checkbox-item input { width: 14px; height: 14px; margin-right: 8px; }
-
             .signature-table { margin-top: 30px; }
             .sig-container { padding: 10px; background: transparent; }
-            .sig-box { 
-                height: 95px; 
-                margin-bottom: 6px; 
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-            }
             .sig-label { font-size: 10.5px; padding-top: 5px; }
-
-            .rules-box { 
-                margin-top: 30px; 
-                padding: 12px 15px; 
-                font-size: 11.5px; 
-                line-height: 1.6;
-            }
-            
-            .footer-table { 
-                margin-top: 35px; 
-                padding-top: 10px; 
-                font-size: 10px; 
-            }
+            .rules-box { margin-top: 30px; padding: 12px 15px; font-size: 11.5px; line-height: 1.6; }
+            .footer-table { margin-top: 35px; padding-top: 10px; font-size: 10px; }
         }
     </style>
 </head>
@@ -245,134 +149,104 @@
         <tr>
             <td class="header-logo-cell">
                 <div class="company-title">
-                    <img src="Murinda Logo.png" alt="Logo Murinda" style="height: 24px; width: auto; display: block; margin-bottom: 6px; object-fit: contain;">
+                    <img src="https://customer-assets.emergentagent.com/job_6d14e784-8a2d-4c15-9bfa-14c0636a15d7/artifacts/Murinda%20Logo.png" alt="Logo Murinda" style="height: 24px; width: auto; display: block; margin-bottom: 6px; object-fit: contain;">
                     <h2>PT MURINDA SENTRA BAJA</h2>
-                    <div>Human Resource & Employee Services</div>
+                    <div>Human Resource &amp; Employee Services</div>
                 </div>
             </td>
             <td class="header-title-cell">
                 <span class="doc-title-main">Formulir Izin Terpadu</span>
                 <span class="doc-title-sub">(GATE PASS SYSTEM)</span>
-                <div class="doc-meta">
-                    No. Form: MSB/F-HR-006 &nbsp;|&nbsp; Revisi: 00
-                </div>
+                <div class="doc-meta">No. Form: MSB/F-HR-006 &nbsp;|&nbsp; Revisi: 00</div>
             </td>
         </tr>
     </table>
 
-    <div class="search-section">
+    <div class="search-section no-print">
         <div class="search-group">
             <label for="id-izin-input"><strong>MASUKKAN ID IZIN :</strong></label>
-            <input type="text" id="id-izin-input" class="search-input" placeholder="Masukkan ID Izin dari Sheet...">
+            <input type="text" id="id-izin-input" class="search-input" placeholder="Ketik ID Izin (otomatis sinkron)..." autocomplete="off" data-testid="id-izin-input">
         </div>
-        <button type="button" class="btn-search" onclick="fetchIzinData()">Cari & Sinkronisasi</button>
+        <span id="status-pill" class="status-pill" data-testid="status-pill">Menunggu input</span>
     </div>
 
-    <div class="section-header">Informasi Personel & Karyawan</div>
+    <div class="section-header">Informasi Personel &amp; Karyawan</div>
     <div class="grid-2">
-        <div class="form-group">
-            <label>ID Karyawan (NIK)</label>
-            <input type="text" id="nik-input" readonly>
-        </div>
-        <div class="form-group">
-            <label>Nama Lengkap</label>
-            <input type="text" id="nama-input" readonly>
-        </div>
+        <div class="form-group"><label>ID Karyawan (NIK)</label><input type="text" id="nik-input" readonly data-testid="nik-input"></div>
+        <div class="form-group"><label>Nama Lengkap</label><input type="text" id="nama-input" readonly data-testid="nama-input"></div>
     </div>
     <div class="grid-2">
-        <div class="form-group">
-            <label>Departemen</label>
-            <input type="text" id="dept-input" readonly>
-        </div>
-        <div class="form-group">
-            <label>Jabatan / Posisi</label>
-            <input type="text" id="jabatan-input" readonly>
-        </div>
+        <div class="form-group"><label>Departemen</label><input type="text" id="dept-input" readonly data-testid="dept-input"></div>
+        <div class="form-group"><label>Jabatan / Posisi</label><input type="text" id="jabatan-input" readonly data-testid="jabatan-input"></div>
     </div>
 
     <div class="section-header">Klasifikasi Ketidakhadiran / Jenis Izin</div>
     <div class="grid-klasifikasi">
         <div class="klasifikasi-box">
             <h4>A. IZIN HARIAN (TIDAK MASUK)</h4>
-            <label class="checkbox-item"><input type="checkbox" id="check-cuti"> Cuti Tahunan (Annual Leave)</label>
-            <label class="checkbox-item"><input type="checkbox" id="check-sakit"> Izin Sakit (Medical - Lampirkan SKD)</label>
-            <label class="checkbox-item"><input type="checkbox" id="check-duka"> Duka / Kemalangan (Compassionate)</label>
+            <label class="checkbox-item"><input type="checkbox" id="check-cuti" disabled> Cuti Tahunan (Annual Leave)</label>
+            <label class="checkbox-item"><input type="checkbox" id="check-sakit" disabled> Izin Sakit (Medical - Lampirkan SKD)</label>
+            <label class="checkbox-item"><input type="checkbox" id="check-duka" disabled> Duka / Kemalangan (Compassionate)</label>
         </div>
         <div class="klasifikasi-box">
             <h4>B. IZIN KELUAR (GATE PASS)</h4>
-            <label class="checkbox-item"><input type="checkbox" id="check-dinas"> Dinas Luar (Work Related)</label>
-            <label class="checkbox-item"><input type="checkbox" id="check-pribadi"> Izin Pribadi (Meninggalkan Kantor)</label>
-            <label class="checkbox-item"><input type="checkbox" id="check-pulang"> Pulang Awal (Early Leave)</label>
-            <label class="checkbox-item"><input type="checkbox" id="check-mendesak"> Keperluan Mendesak (Urgent)</label>
-            <label class="checkbox-item"><input type="checkbox" id="check-terlambat"> Datang Terlambat (Late Arrival)</label>
+            <label class="checkbox-item"><input type="checkbox" id="check-dinas" disabled> Dinas Luar (Work Related)</label>
+            <label class="checkbox-item"><input type="checkbox" id="check-pribadi" disabled> Izin Pribadi (Meninggalkan Kantor)</label>
+            <label class="checkbox-item"><input type="checkbox" id="check-pulang" disabled> Pulang Awal (Early Leave)</label>
+            <label class="checkbox-item"><input type="checkbox" id="check-mendesak" disabled> Keperluan Mendesak (Urgent)</label>
+            <label class="checkbox-item"><input type="checkbox" id="check-terlambat" disabled> Datang Terlambat (Late Arrival)</label>
         </div>
     </div>
 
-    <div class="section-header">Rincian Waktu, Durasi & Alasan</div>
+    <div class="section-header">Rincian Waktu, Durasi &amp; Alasan</div>
     <div class="grid-3">
-        <div class="form-group">
-            <label>Tanggal Mulai</label>
-            <input type="text" id="tgl-mulai-input" readonly>
-        </div>
-        <div class="form-group">
-            <label>Tanggal Selesai</label>
-            <input type="text" id="tgl-selesai-input" readonly>
-        </div>
-        <div class="form-group">
-            <label>Durasi (Hari)</label>
-            <input type="text" id="durasi-input" readonly>
-        </div>
+        <div class="form-group"><label>Tanggal Mulai</label><input type="text" id="tgl-mulai-input" readonly data-testid="tgl-mulai-input"></div>
+        <div class="form-group"><label>Tanggal Selesai</label><input type="text" id="tgl-selesai-input" readonly data-testid="tgl-selesai-input"></div>
+        <div class="form-group"><label>Durasi (Hari)</label><input type="text" id="durasi-input" readonly data-testid="durasi-input"></div>
     </div>
 
     <div class="grid-3">
-        <div class="form-group">
-            <label>Jam Keluar</label>
-            <input type="text" id="jam-keluar-input" readonly>
-        </div>
-        <div class="form-group">
-            <label>Jam Kembali</label>
-            <input type="text" id="jam-kembali-input" readonly>
-        </div>
-        <div class="form-group">
-            <label>Kembali ke Kantor?</label>
-            <input type="text" id="kembali-input" readonly>
-        </div>
+        <div class="form-group"><label>Jam Keluar</label><input type="text" id="jam-keluar-input" readonly data-testid="jam-keluar-input"></div>
+        <div class="form-group"><label>Jam Kembali</label><input type="text" id="jam-kembali-input" readonly data-testid="jam-kembali-input"></div>
+        <div class="form-group"><label>Kembali ke Kantor?</label><input type="text" id="kembali-input" readonly data-testid="kembali-input"></div>
     </div>
 
     <div class="grid-2" style="margin-top: 5px;">
-        <div class="form-group">
-            <label>Keterangan / Alasan Terperinci</label>
-            <input type="text" id="keterangan-input" readonly>
-        </div>
-        <div class="form-group">
-            <label>Serah Terima Tugas (Handover Ke)</label>
-            <input type="text" id="handover-input" readonly>
-        </div>
+        <div class="form-group"><label>Keterangan / Alasan Terperinci</label><input type="text" id="keterangan-input" readonly data-testid="keterangan-input"></div>
+        <div class="form-group"><label>Serah Terima Tugas (Handover Ke)</label><input type="text" id="handover-input" readonly data-testid="handover-input"></div>
     </div>
 
     <table class="signature-table">
         <tr>
             <td>
-                <div class="sig-container">
-                    <div class="sig-box" id="sig-pemohon"></div>
+                <div class="sig-container" data-testid="sig-pemohon">
+                    <div class="sig-stamp-text" id="sig-pemohon-text"></div>
+                    <div class="sig-stamp-name" id="sig-pemohon-name"></div>
+                    <div class="sig-qr placeholder" id="sig-pemohon-qr"></div>
                     <div class="sig-label">Pemohon</div>
                 </div>
             </td>
             <td>
-                <div class="sig-container">
-                    <div class="sig-box" id="sig-manager"></div>
-                    <div class="sig-label">Manager Terkait</div>
+                <div class="sig-container" data-testid="sig-atasan">
+                    <div class="sig-stamp-text" id="sig-atasan-text"></div>
+                    <div class="sig-stamp-name" id="sig-atasan-name"></div>
+                    <div class="sig-qr placeholder" id="sig-atasan-qr"></div>
+                    <div class="sig-label">Atasan Langsung</div>
                 </div>
             </td>
             <td>
-                <div class="sig-container">
-                    <div class="sig-box" id="sig-hrd"></div>
+                <div class="sig-container" data-testid="sig-hrd">
+                    <div class="sig-stamp-text" id="sig-hrd-text"></div>
+                    <div class="sig-stamp-name" id="sig-hrd-name"></div>
+                    <div class="sig-qr placeholder" id="sig-hrd-qr"></div>
                     <div class="sig-label">HR Department</div>
                 </div>
             </td>
             <td>
-                <div class="sig-container">
-                    <div class="sig-box" id="sig-security"></div>
+                <div class="sig-container" data-testid="sig-security">
+                    <div class="sig-stamp-text" id="sig-security-text"></div>
+                    <div class="sig-stamp-name" id="sig-security-name"></div>
+                    <div class="sig-qr placeholder" id="sig-security-qr"></div>
                     <div class="sig-label">Security Gate</div>
                 </div>
             </td>
@@ -380,7 +254,7 @@
     </table>
 
     <div class="rules-box">
-        <strong>Prosedur Keamanan & Ketertiban Gerbang:</strong>
+        <strong>Prosedur Keamanan &amp; Ketertiban Gerbang:</strong>
         <ol style="margin: 0; padding-left: 20px; line-height: 1.6;">
             <li>Pengajuan izin harian wajib dilakukan H-3, kecuali kondisi darurat medis/sakit.</li>
             <li>Formulir Gate Pass harus disetujui Atasan dan divalidasi fisik oleh Security di pos depan.</li>
@@ -396,98 +270,249 @@
     </table>
 
     <div style="text-align: center; margin-top: 25px;" class="no-print">
-        <button onclick="window.print()" style="padding: 12px 35px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.2s;">Cetak Dokumen / Simpan PDF</button>
+        <button onclick="window.print()" data-testid="btn-print" style="padding: 12px 35px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.2s;">Cetak Dokumen / Simpan PDF</button>
     </div>
 </div>
 
 <script>
-  var now = new Date();
-  var formatWaktu = now.toLocaleString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-  document.getElementById('print-time').innerText = formatWaktu + ' WIB';
+/* ============================================================
+   KONFIGURASI - Spreadsheet harus "Anyone with the link can view"
+   ============================================================ */
+const SHEET_ID   = "1Z95O80wBV2j2DMEJe59ZSShuJFuBSv6NcmhO39gYjlM";
+const SHEET_NAME = "Pengajuan";
+const CSV_URL    = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
 
-  function clearCheckboxes() {
-    const checkboxes = ['check-cuti', 'check-sakit', 'check-duka', 'check-dinas', 'check-pribadi', 'check-pulang', 'check-mendesak', 'check-terlambat'];
-    checkboxes.forEach(id => document.getElementById(id).checked = false);
-    document.getElementById('sig-pemohon').innerHTML = '';
-    document.getElementById('sig-manager').innerHTML = '';
-    document.getElementById('sig-hrd').innerHTML = '';
-    document.getElementById('sig-security').innerHTML = '';
-  }
+/* Waktu cetak */
+const now = new Date();
+document.getElementById('print-time').innerText =
+    now.toLocaleString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + ' WIB';
 
-  function fetchIzinData() {
-    var idIzin = document.getElementById('id-izin-input').value.trim();
-    if(!idIzin) { alert("Silakan isi ID Izin terlebih dahulu!"); return; }
-    
-    // GANTI DENGAN URL WEB APP DEPLOYMENT TERBARU ANDA
-    var url = "https://script.google.com/macros/s/AKfycbwgdzqqzGz5TNTTctB0UcuP6vtimuTco9PjNUYSeN6FAipcE1aPY5wgnHNTrjx8QawViw/exec" + "?idIzin=" + idIzin;
-
-    // Menggunakan konfigurasi cross-origin dan redirect follow secara optimal
-    fetch(url, {
-      method: "GET",
-      mode: "cors",
-      redirect: "follow"
-    })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error("HTTP error, status = " + response.status);
-        }
-        return response.json();
-      })
-      .then(data => {
-        if(data.success === true) {
-          clearCheckboxes();
-
-          document.getElementById('nik-input').value = data.nik || "";
-          document.getElementById('nama-input').value = data.nama || "";
-          document.getElementById('jabatan-input').value = data.jabatan || "";
-          document.getElementById('dept-input').value = data.dept || "";
-          document.getElementById('tgl-mulai-input').value = data.tglMulai || "";
-          document.getElementById('tgl-selesai-input').value = data.tglSelesai || "";
-          document.getElementById('durasi-input').value = data.durasi ?? "";
-          document.getElementById('jam-keluar-input').value = data.jamKeluar || "-";
-          document.getElementById('jam-kembali-input').value = data.jamKembali || "-";
-          document.getElementById('kembali-input').value = data.kembali || "";
-          document.getElementById('keterangan-input').value = data.keterangan || "";
-          document.getElementById('handover-input').value = data.handover || "-";
-
-          var jenis = data.jenisIzin ? data.jenisIzin.trim().toLowerCase() : "";
-          
-          if(jenis.includes("cuti tahunan")) document.getElementById('check-cuti').checked = true;
-          else if(jenis.includes("sakit")) document.getElementById('check-sakit').checked = true;
-          else if(jenis.includes("duka") || jenis.includes("kemalangan")) document.getElementById('check-duka').checked = true;
-          else if(jenis.includes("dinas luar")) document.getElementById('check-dinas').checked = true;
-          else if(jenis.includes("izin pribadi")) document.getElementById('check-pribadi').checked = true;
-          else if(jenis.includes("pulang awal")) document.getElementById('check-pulang').checked = true;
-          else if(jenis.includes("mendesak") || jenis.includes("urgent")) document.getElementById('check-mendesak').checked = true;
-          else if(jenis.includes("terlambat")) document.getElementById('check-terlambat').checked = true;
-
-          // 1. Generate QR Code Pemohon Dinamis (ID Karyawan - Nama)
-          if(data.nik && data.nama) {
-              var textPemohon = data.nik + " - " + data.nama;
-              var qrPemohonUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" + encodeURIComponent(textPemohon);
-              document.getElementById('sig-pemohon').innerHTML = '<img src="' + qrPemohonUrl + '" alt="QR Pemohon" style="height: 60px; object-fit: contain;">';
-          }
-
-          // 2. Tanda Tangan Digital Manager Terkait
-          var managerRole = data.managerApproval; 
-          var sigManagerBox = document.getElementById('sig-manager');
-          if (managerRole && managerRole.trim() !== "") {
-              sigManagerBox.innerHTML = '<img src="' + managerRole + '.png" alt="QR ' + managerRole + '" style="height: 45px; object-fit: contain; margin-bottom: 2px;"><div style="font-size: 8px; line-height: 1.1; color: #475569; text-align: center;">Ditanda tangani secara digital oleh:<br><b>' + managerRole + '</b></div>';
-          }
-
-          // 3. Tanda Tangan Digital HRD & Security
-          document.getElementById('sig-hrd').innerHTML = '<img src="HRD.png" alt="QR HRD" style="height: 45px; object-fit: contain; margin-bottom: 2px;"><div style="font-size: 8px; line-height: 1.1; color: #475569; text-align: center;">Ditanda tangani secara digital oleh:<br><b>HR Department</b></div>';
-          document.getElementById('sig-security').innerHTML = '<img src="Security.png" alt="QR Security" style="height: 45px; object-fit: contain; margin-bottom: 2px;"><div style="font-size: 8px; line-height: 1.1; color: #475569; text-align: center;">Ditanda tangani secara digital oleh:<br><b>Security Gate</b></div>';
-
+/* ============================================================
+   CSV PARSER (handles quoted fields & escaped quotes)
+   ============================================================ */
+function parseCSV(text) {
+    const rows = [];
+    let cur = [], field = '', inQuotes = false;
+    for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        if (inQuotes) {
+            if (c === '"' && text[i+1] === '"') { field += '"'; i++; }
+            else if (c === '"') { inQuotes = false; }
+            else { field += c; }
         } else {
-          alert(data.message || "ID Izin tidak ditemukan di database!");
+            if (c === '"') { inQuotes = true; }
+            else if (c === ',') { cur.push(field); field = ''; }
+            else if (c === '\n') { cur.push(field); rows.push(cur); cur = []; field = ''; }
+            else if (c === '\r') { /* skip */ }
+            else { field += c; }
         }
-      })
-      .catch(error => {
-        console.error('Error detail:', error);
-        alert("Gagal terhubung dengan server database Apps Script.\n\nCatatan Keamanan Browser:\nJika Anda menjalankan file HTML langsung dari folder komputer (URL diawali 'file:///'), browser akan otomatis memblokir koneksi database demi alasan keamanan (CORS Policy).\n\nSolusi: Unggah (push) file HTML ini ke GitHub Pages MSB Anda, atau jalankan menggunakan VS Code Live Server.");
-      });
-  }
+    }
+    if (field.length || cur.length) { cur.push(field); rows.push(cur); }
+    return rows;
+}
+
+function rowsToObjects(rows) {
+    if (!rows.length) return [];
+    const headers = rows[0].map(h => h.trim());
+    return rows.slice(1)
+        .filter(r => r.some(c => (c || '').trim() !== ''))
+        .map(r => {
+            const o = {};
+            headers.forEach((h, i) => { o[h] = (r[i] || '').trim(); });
+            return o;
+        });
+}
+
+/* ============================================================
+   STATUS PILL
+   ============================================================ */
+const pill = document.getElementById('status-pill');
+function setStatus(text, kind) {
+    pill.textContent = text;
+    pill.classList.remove('loading', 'success', 'error');
+    if (kind) pill.classList.add(kind);
+}
+
+/* ============================================================
+   FETCH SPREADSHEET DATA (cached)
+   ============================================================ */
+let DATA_CACHE = null;
+let FETCH_PROMISE = null;
+
+async function loadData(force=false) {
+    if (DATA_CACHE && !force) return DATA_CACHE;
+    if (FETCH_PROMISE) return FETCH_PROMISE;
+    setStatus('Memuat database...', 'loading');
+    FETCH_PROMISE = fetch(CSV_URL + '&_ts=' + Date.now())
+        .then(r => {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.text();
+        })
+        .then(text => {
+            const rows = parseCSV(text);
+            DATA_CACHE = rowsToObjects(rows);
+            setStatus('Database siap (' + DATA_CACHE.length + ' baris)', 'success');
+            return DATA_CACHE;
+        })
+        .catch(err => {
+            console.error(err);
+            setStatus('Gagal memuat spreadsheet', 'error');
+            FETCH_PROMISE = null;
+            throw err;
+        });
+    return FETCH_PROMISE;
+}
+
+/* Auto refresh setiap 30 detik supaya realtime */
+setInterval(() => { DATA_CACHE = null; FETCH_PROMISE = null; loadData(true); }, 30000);
+
+/* ============================================================
+   CHECKBOX MAPPING
+   ============================================================ */
+const CHECK_IDS = ['check-cuti','check-sakit','check-duka','check-dinas','check-pribadi','check-pulang','check-mendesak','check-terlambat'];
+function clearChecks() { CHECK_IDS.forEach(id => document.getElementById(id).checked = false); }
+function applyJenis(jenis) {
+    clearChecks();
+    const j = (jenis || '').toLowerCase();
+    if (j.includes('cuti tahunan')) document.getElementById('check-cuti').checked = true;
+    else if (j.includes('sakit')) document.getElementById('check-sakit').checked = true;
+    else if (j.includes('duka') || j.includes('kemalangan')) document.getElementById('check-duka').checked = true;
+    else if (j.includes('dinas luar')) document.getElementById('check-dinas').checked = true;
+    else if (j.includes('izin pribadi')) document.getElementById('check-pribadi').checked = true;
+    else if (j.includes('pulang awal')) document.getElementById('check-pulang').checked = true;
+    else if (j.includes('mendesak') || j.includes('urgent')) document.getElementById('check-mendesak').checked = true;
+    else if (j.includes('terlambat')) document.getElementById('check-terlambat').checked = true;
+}
+
+/* ============================================================
+   QR CODE HELPERS
+   ============================================================ */
+function clearSignature(prefix) {
+    document.getElementById('sig-' + prefix + '-text').textContent = '';
+    document.getElementById('sig-' + prefix + '-name').textContent = '';
+    const qr = document.getElementById('sig-' + prefix + '-qr');
+    qr.innerHTML = '';
+    qr.classList.add('placeholder');
+}
+
+function setSignatureText(prefix, name) {
+    document.getElementById('sig-' + prefix + '-text').textContent = 'Ditanda Tangani Secara Digital Oleh';
+    document.getElementById('sig-' + prefix + '-name').textContent = name || '';
+}
+
+function renderQRCode(prefix, content) {
+    const el = document.getElementById('sig-' + prefix + '-qr');
+    el.innerHTML = '';
+    el.classList.remove('placeholder');
+    new QRCode(el, { text: content, width: 80, height: 80, correctLevel: QRCode.CorrectLevel.M });
+}
+
+function renderQRImage(prefix, src) {
+    const el = document.getElementById('sig-' + prefix + '-qr');
+    el.innerHTML = '';
+    el.classList.remove('placeholder');
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = src;
+    img.onerror = () => { el.innerHTML = '<span style="color:#dc2626;font-size:9px;">Gambar tidak ditemukan: ' + src + '</span>'; };
+    el.appendChild(img);
+}
+
+/* ============================================================
+   FILL FORM
+   ============================================================ */
+function clearForm() {
+    ['nik-input','nama-input','jabatan-input','dept-input','tgl-mulai-input','tgl-selesai-input','durasi-input','jam-keluar-input','jam-kembali-input','kembali-input','keterangan-input','handover-input']
+      .forEach(id => document.getElementById(id).value = '');
+    clearChecks();
+    ['pemohon','atasan','hrd','security'].forEach(clearSignature);
+}
+
+function fillForm(row) {
+    document.getElementById('nik-input').value         = row['ID Karyawan'] || '';
+    document.getElementById('nama-input').value        = row['Nama Lengkap'] || '';
+    document.getElementById('jabatan-input').value     = row['Jabatan'] || '';
+    document.getElementById('dept-input').value        = row['Departemen'] || '';
+    document.getElementById('tgl-mulai-input').value   = row['Tanggal Mulai'] || '';
+    document.getElementById('tgl-selesai-input').value = row['Tanggal Selesai'] || '';
+    document.getElementById('durasi-input').value      = row['Durasi'] || '';
+    document.getElementById('jam-keluar-input').value  = row['Jam Keluar'] || '-';
+    document.getElementById('jam-kembali-input').value = row['Jam Kembali'] || '-';
+    document.getElementById('kembali-input').value     = row['Kembali ke Kantor?'] || '';
+    document.getElementById('keterangan-input').value  = row['Keterangan/Alasan'] || row['Keterangan / Alasan'] || '';
+    document.getElementById('handover-input').value    = row['Handover Tugas ke'] || '-';
+
+    applyJenis(row['Jenis Izin']);
+
+    /* SIGNATURES */
+    const nama = row['Nama Lengkap'] || '';
+    const idKar = row['ID Karyawan'] || '';
+    const idIzin = row['ID Izin'] || '';
+
+    // Pemohon: text + QR code (ID + Nama Karyawan)
+    if (nama) {
+        setSignatureText('pemohon', nama);
+        const qrContent = (idKar ? idKar + ' | ' : '') + nama + (idIzin ? ' | ' + idIzin : '');
+        renderQRCode('pemohon', qrContent);
+    } else { clearSignature('pemohon'); }
+
+    // Atasan Langsung: ambil dari kolom Manager
+    const manager = (row['Manager'] || '').trim();
+    if (manager) {
+        setSignatureText('atasan', manager);
+        renderQRImage('atasan', 'images/' + manager + '.png');
+    } else { clearSignature('atasan'); }
+
+    // HRD: hanya tampil jika "Dikonfirmasi" / "Terkonfirmasi"
+    const hrdVal = (row['HRD'] || '').toLowerCase();
+    if (hrdVal.includes('konfirmasi')) {
+        setSignatureText('hrd', 'HR Department');
+        renderQRImage('hrd', 'images/HR.png');
+    } else { clearSignature('hrd'); }
+
+    // Security
+    const secVal = (row['Security'] || '').toLowerCase();
+    if (secVal.includes('konfirmasi')) {
+        setSignatureText('security', 'Security Gate');
+        renderQRImage('security', 'images/Security.png');
+    } else { clearSignature('security'); }
+}
+
+/* ============================================================
+   SEARCH HANDLER (auto, debounced)
+   ============================================================ */
+const idInput = document.getElementById('id-izin-input');
+let debounceTimer = null;
+
+async function performSearch() {
+    const idIzin = idInput.value.trim();
+    if (!idIzin) { clearForm(); setStatus('Menunggu input', ''); return; }
+    try {
+        const data = await loadData();
+        const row = data.find(r => (r['ID Izin'] || '').toLowerCase() === idIzin.toLowerCase());
+        if (row) {
+            fillForm(row);
+            setStatus('Data ditemukan untuk ' + idIzin, 'success');
+        } else {
+            clearForm();
+            setStatus('ID Izin "' + idIzin + '" tidak ditemukan', 'error');
+        }
+    } catch (e) {
+        setStatus('Gagal memuat database', 'error');
+    }
+}
+
+idInput.addEventListener('input', () => {
+    setStatus('Mencari...', 'loading');
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(performSearch, 350);
+});
+
+/* Pre-load on first page open */
+loadData().catch(() => {});
+
+/* Expose for testing */
+window.__app = { performSearch, loadData, fillForm };
 </script>
 </body>
 </html>
