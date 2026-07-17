@@ -12,87 +12,192 @@
             --primary: #1e3a8a; 
             --primary-light: #3b82f6;
             --primary-dark: #172554;
-            --bg-body: #f4f6f9;
             --text-main: #0f172a;
-            --text-muted: #64748b;
-            --border-color: #cbd5e1;
-            --bg-input: #f8fafc;
+            --text-muted: #475569;
+            --glass-border: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(255, 255, 255, 0.35);
+            --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
         }
         
         * { box-sizing: border-box; }
         
         body { 
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
-            background-color: var(--bg-body); 
+            margin: 0;
             padding: 50px 20px; 
             color: var(--text-main); 
             font-size: 14px;
             line-height: 1.5;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
+            min-height: 100vh;
         }
 
+        /* LIQUID BACKGROUND ANIMATION */
+        .liquid-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: -1;
+            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+            overflow: hidden;
+        }
+        .blob {
+            position: absolute;
+            filter: blur(70px);
+            opacity: 0.6;
+            animation: float 12s infinite ease-in-out alternate;
+            z-index: -1;
+        }
+        .blob-1 {
+            width: 600px; height: 600px;
+            background: #a1c4fd;
+            top: -100px; left: -100px;
+            border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+        }
+        .blob-2 {
+            width: 700px; height: 700px;
+            background: #c2e9fb;
+            bottom: -200px; right: -150px;
+            border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+            animation-delay: -4s;
+        }
+        .blob-3 {
+            width: 500px; height: 500px;
+            background: #8fd3f4;
+            top: 30%; left: 30%;
+            border-radius: 50% 50% 30% 70% / 50% 50% 70% 50%;
+            animation-delay: -8s;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) scale(1) rotate(0deg); }
+            100% { transform: translateY(-40px) scale(1.05) rotate(10deg); }
+        }
+
+        /* GLASSMORPHISM BASE CLASSES */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow), inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+            border-radius: 16px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* 3D INTERACTIVE GLASS EFFECT DENGAN PANTULAN CAHAYA */
+        .interactive-glass {
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease, background 0.3s ease;
+        }
+
+        /* Efek Pantulan Cahaya (Light Sweep) */
+        .interactive-glass::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: linear-gradient(
+                to bottom right,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.05) 40%,
+                rgba(255, 255, 255, 0.6) 50%,
+                rgba(255, 255, 255, 0.05) 60%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            transform: rotate(35deg) translateY(-100%);
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        .interactive-glass:hover {
+            transform: translateY(-5px) scale(1.01);
+            box-shadow: 0 15px 40px rgba(31, 38, 135, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.45);
+        }
+
+        .interactive-glass:hover::before {
+            transform: rotate(35deg) translateY(100%);
+        }
+
+        .interactive-glass:active {
+            transform: translateY(2px) scale(0.99);
+            box-shadow: 0 5px 15px rgba(31, 38, 135, 0.15), inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* FORM CONTAINER */
         .form-container { 
-            background: #fff; 
             max-width: 850px; 
             margin: auto; 
             padding: 45px; 
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.02), 0 8px 16px -6px rgba(0,0,0,0.02);
-            border-radius: 12px; 
-            border: 1px solid #e2e8f0;
+            border-radius: 20px; 
         }
 
-        /* HEADER & KOTAK JUDUL BARU */
-        .header-table { width: 100%; border-collapse: collapse; border-bottom: 2px solid var(--primary); padding-bottom: 15px; margin-bottom: 35px; }
+        /* HEADER & KOTAK JUDUL */
+        .header-table { width: 100%; border-collapse: collapse; border-bottom: 2px solid rgba(30, 58, 138, 0.3); padding-bottom: 15px; margin-bottom: 35px; }
         .header-logo-cell { vertical-align: middle; padding-bottom: 15px; }
         .header-title-cell { text-align: right; vertical-align: middle; padding-bottom: 15px; }
-        .company-title h2 { margin: 0; color: var(--primary); font-size: 22px; font-weight: 800; letter-spacing: 0.5px; line-height: 1.2; }
-        .company-title div { font-size: 12px; color: var(--text-muted); margin-top: 3px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .company-title h2 { margin: 0; color: var(--primary); font-size: 22px; font-weight: 800; letter-spacing: 0.5px; text-shadow: 0 2px 4px rgba(255,255,255,0.5); }
+        .company-title div { font-size: 12px; color: var(--text-muted); margin-top: 3px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
         
-        /* Desain Kotak untuk Judul Dokumen */
         .doc-title-box {
             display: inline-block;
-            border: 1px solid var(--border-color);
-            background-color: #f8fafc;
             padding: 12px 18px;
-            border-radius: 8px;
             text-align: center;
             min-width: 310px;
-            box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
         }
-        .doc-title-main { font-size: 18px; font-weight: 800; color: #1e293b; display: block; text-transform: uppercase; letter-spacing: 0.5px; }
-        .doc-title-sub { font-size: 11px; font-weight: 700; color: var(--primary-light); display: block; margin-top: 1px; letter-spacing: 1px; }
-        .doc-meta { font-size: 10px; color: var(--text-muted); margin-top: 4px; font-weight: 500; }
+        .doc-title-main { font-size: 18px; font-weight: 800; color: #1e293b; display: block; text-transform: uppercase; letter-spacing: 0.5px; text-shadow: 0 1px 2px rgba(255,255,255,0.8); }
+        .doc-title-sub { font-size: 11px; font-weight: 800; color: var(--primary-light); display: block; margin-top: 1px; letter-spacing: 1px; }
+        .doc-meta { font-size: 10px; color: var(--text-muted); margin-top: 4px; font-weight: 600; }
         
-        /* Kontainer Barcode */
-        .barcode-container { margin-top: 8px; display: flex; justify-content: center; }
+        .barcode-container { margin-top: 8px; display: flex; justify-content: center; mix-blend-mode: multiply; }
         #header-barcode { max-width: 100%; height: auto; }
 
         /* SEARCH BAR */
-        .search-section { background: #f8fafc; padding: 16px 20px; border-radius: 8px; margin-bottom: 30px; display: flex; align-items: center; gap: 15px; border: 1px solid #e2e8f0; }
+        .search-section { padding: 16px 20px; margin-bottom: 30px; display: flex; align-items: center; gap: 15px; }
         .search-group { flex: 1; display: flex; align-items: center; gap: 12px; }
-        .search-group label { margin-bottom: 0; white-space: nowrap; font-size: 12px; font-weight: 700; color: var(--primary-dark); letter-spacing: 0.5px; }
-        .search-input { 
-            flex: 1; padding: 10px 14px; border: 1px solid var(--border-color); 
-            border-radius: 6px; font-size: 14px; font-weight: 700; color: var(--primary);
-            transition: all 0.2s ease; background: #fff;
+        .search-group label { margin-bottom: 0; white-space: nowrap; font-size: 12px; font-weight: 800; color: var(--primary-dark); letter-spacing: 0.5px; text-shadow: 0 1px 1px rgba(255,255,255,0.8); }
+        
+        /* 3D CARVED INPUTS */
+        input[type="text"] { 
+            width: 100%; padding: 10px 14px; 
+            background: rgba(255, 255, 255, 0.4); 
+            border: 1px solid rgba(255, 255, 255, 0.6); 
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            border-left: 1px solid rgba(0, 0, 0, 0.05);
+            border-radius: 8px; font-size: 14px; font-weight: 700; color: #1e293b;
+            box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.04), inset -2px -2px 5px rgba(255, 255, 255, 0.7);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
         }
-        .search-input:focus { border-color: var(--primary-light); outline: none; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
-        .status-pill { font-size: 12px; padding: 6px 14px; border-radius: 4px; font-weight: 700; white-space: nowrap; background: #e2e8f0; color: #475569; }
-        .status-pill.loading { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
-        .status-pill.success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
-        .status-pill.error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        input[type="text"]:not([readonly]) { background: rgba(255, 255, 255, 0.6); }
+        input[type="text"]:focus { 
+            background: rgba(255, 255, 255, 0.8); 
+            border-color: #ffffff; 
+            box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.02), inset -2px -2px 5px rgba(255, 255, 255, 1), 0 0 12px rgba(59, 130, 246, 0.4);
+            outline: none; 
+            transform: translateY(-1px);
+        }
+
+        .status-pill { font-size: 12px; padding: 6px 14px; border-radius: 6px; font-weight: 800; white-space: nowrap; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .status-pill.loading { background: rgba(254, 243, 199, 0.8); color: #92400e; border: 1px solid rgba(253, 230, 138, 0.8); backdrop-filter: blur(4px); }
+        .status-pill.success { background: rgba(220, 252, 231, 0.8); color: #166534; border: 1px solid rgba(187, 247, 208, 0.8); backdrop-filter: blur(4px); }
+        .status-pill.error { background: rgba(254, 226, 226, 0.8); color: #991b1b; border: 1px solid rgba(254, 202, 202, 0.8); backdrop-filter: blur(4px); }
 
         /* SECTION HEADER */
         .section-header { 
-            font-weight: 700; color: var(--primary); 
-            border-bottom: 1px solid #e2e8f0; 
+            font-weight: 800; color: var(--primary); 
+            border-bottom: 1px solid rgba(30, 58, 138, 0.2); 
             margin: 35px 0 18px 0; padding-bottom: 6px; 
-            text-transform: uppercase; font-size: 12px; letter-spacing: 0.8px;
+            text-transform: uppercase; font-size: 12px; letter-spacing: 1px;
             display: flex; align-items: center; gap: 6px;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.5);
         }
         .section-header::before {
-            content: ''; display: inline-block; width: 3px; height: 14px; background: var(--primary-light); border-radius: 1px;
+            content: ''; display: inline-block; width: 4px; height: 14px; background: var(--primary-light); border-radius: 2px; box-shadow: 0 0 5px var(--primary-light);
         }
         
         /* FORM GRID */
@@ -100,92 +205,83 @@
         .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 16px; }
         .form-group { display: flex; flex-direction: column; }
         
-        label { font-size: 11px; margin-bottom: 5px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
-        input[type="text"] { 
-            width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); 
-            border-radius: 6px; background-color: var(--bg-input); font-size: 14px; font-weight: 600; color: #334155;
-        }
-        input[type="text"]:not([readonly]) { background-color: #fff; }
-        input[type="text"]:focus { background-color: #fff; border-color: var(--primary-light); outline: none; }
+        label { font-size: 11px; margin-bottom: 6px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; text-shadow: 0 1px 1px rgba(255,255,255,0.7); }
 
         /* CLASSIFICATION BOXES */
         .grid-klasifikasi { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-        .klasifikasi-box { border: 1px solid #e2e8f0; padding: 18px; border-radius: 8px; background: #fff; }
-        .klasifikasi-box h4 { margin: 0 0 12px 0; font-size: 11px; color: var(--primary); border-bottom: 1px solid #f1f5f9; padding-bottom: 6px; font-weight: 800; letter-spacing: 0.5px; }
-        .checkbox-item { display: flex; align-items: center; font-size: 13px; margin-bottom: 8px; color: #334155; font-weight: 600; cursor: pointer; }
-        .checkbox-item input { margin-right: 10px; width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
+        .klasifikasi-box { padding: 20px; border-radius: 12px; }
+        .klasifikasi-box h4 { margin: 0 0 14px 0; font-size: 12px; color: var(--primary); border-bottom: 1px solid rgba(30, 58, 138, 0.1); padding-bottom: 8px; font-weight: 800; letter-spacing: 0.5px; text-shadow: 0 1px 1px rgba(255,255,255,0.8); }
+        .checkbox-item { display: flex; align-items: center; font-size: 13px; margin-bottom: 10px; color: #1e293b; font-weight: 700; cursor: pointer; text-shadow: 0 1px 1px rgba(255,255,255,0.5); }
+        .checkbox-item input { margin-right: 12px; width: 18px; height: 18px; accent-color: var(--primary-light); cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
         /* VALIDATION NOTICE */
         .validation-notice {
-            background-color: #f8fafc;
-            border-left: 3px solid var(--primary-light);
-            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-left: 4px solid var(--primary-light);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+            padding: 16px 20px;
             margin-top: 40px;
             margin-bottom: 25px;
             font-size: 12.5px;
-            color: #334155;
-            line-height: 1.5;
-            border-radius: 0 6px 6px 0;
+            color: #1e293b;
+            line-height: 1.6;
+            border-radius: 8px;
         }
-        .validation-notice strong { color: var(--primary-dark); }
+        .validation-notice strong { color: var(--primary-dark); font-weight: 800; }
         
-        /* SIGNATURE MATRIX WITH ANTI-EDIT SECURITY */
+        /* SIGNATURE MATRIX */
         .signature-table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-top: 10px; }
         .signature-table td { padding: 10px 12px; vertical-align: top; text-align: center; }
         .signature-table td:first-child { padding-left: 0; }
         .signature-table td:last-child { padding-right: 0; }
         
         .sig-wrapper {
-            position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: space-between;
-            min-height: 215px;
-            padding: 14px 10px;
-            border: 1px solid #f1f5f9;
-            border-radius: 8px;
-            /* Lapisan Pengaman 1: Pola Micro-dot pattern untuk mencegah manipulasi gambar latar */
-            background-image: radial-gradient(rgba(30, 58, 138, 0.04) 1px, transparent 0);
-            background-size: 8px 8px;
-            overflow: hidden;
+            min-height: 220px;
+            padding: 16px 10px;
+            border-radius: 12px;
+            background-image: radial-gradient(rgba(30, 58, 138, 0.06) 1px, transparent 0);
+            background-size: 10px 10px;
         }
 
-        /* Lapisan Pengaman 2: Watermark Text Pelindung QR */
         .sig-security-watermark {
             position: absolute;
             font-size: 7.5px;
-            font-weight: 700;
-            color: rgba(148, 163, 184, 0.12);
+            font-weight: 800;
+            color: rgba(148, 163, 184, 0.2);
             text-transform: uppercase;
             white-space: nowrap;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%) rotate(-15deg);
+            transform: translate(-50%, -50%) rotate(-20deg);
             pointer-events: none;
             user-select: none;
             z-index: 0;
         }
 
-        /* PENYESUAIAN FONT: Dibuat Kalem, Santai, dan Alami */
         .sig-title { 
             font-size: 13.5px; 
-            font-weight: 600; 
-            color: #334155; 
-            text-transform: none; /* Mengubah dari kaku UPPERCASE menjadi normal */
-            letter-spacing: 0;
-            margin: 0 0 4px 0;
+            font-weight: 700; 
+            color: #1e293b; 
+            margin: 0 0 6px 0;
             position: relative;
             z-index: 1;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.8);
         }
 
         .sig-stamp-text { 
             font-size: 9px; 
             color: var(--text-muted); 
             font-style: italic; 
+            font-weight: 600;
             line-height: 1.2; 
             min-height: 22px;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             position: relative;
             z-index: 1;
         }
@@ -194,49 +290,50 @@
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            width: 95px;
-            height: 95px;
+            width: 100px;
+            height: 100px;
             margin: 0 auto;
-            background: #ffffff;
-            border: 1px dashed #e2e8f0;
-            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05), inset 0 2px 5px rgba(0,0,0,0.02);
+            border-radius: 8px;
             padding: 6px;
-            transition: all 0.2s;
             position: relative;
             z-index: 1;
+            backdrop-filter: blur(5px);
         }
-        .sig-qr img, .sig-qr canvas { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .sig-qr img, .sig-qr canvas { max-width: 100%; max-height: 100%; object-fit: contain; mix-blend-mode: multiply; }
         .sig-qr.placeholder { 
-            border: 1px dashed #cbd5e1; 
-            background: rgba(248, 250, 252, 0.8); 
-            color: #94a3b8; 
-            font-size: 9.5px; 
-            font-style: normal;
-            font-weight: 500;
+            border: 1px dashed rgba(148, 163, 184, 0.5); 
+            background: rgba(248, 250, 252, 0.4); 
+            color: #64748b; 
+            font-size: 10px; 
+            font-weight: 700;
             padding: 8px;
-            line-height: 1.3;
+            line-height: 1.4;
         }
 
         .sig-stamp-name { 
-            font-size: 12.5px; 
-            font-weight: 700; 
+            font-size: 13px; 
+            font-weight: 800; 
             color: var(--text-main); 
-            margin-top: 10px; 
-            padding-top: 6px;
-            border-top: 1px solid #94a3b8;
+            margin-top: 12px; 
+            padding-top: 8px;
+            border-top: 1px solid rgba(148, 163, 184, 0.4);
             width: 90%;
             min-height: 20px;
             letter-spacing: 0.2px;
             position: relative;
             z-index: 1;
+            text-shadow: 0 1px 1px rgba(255,255,255,0.8);
         }
 
-        /* Lapisan Pengaman 3: Token Kriptografi unik anti-tempel qr palsu */
         .sig-security-token {
-            font-size: 7.5px;
+            font-size: 8px;
             font-family: monospace;
-            color: #94a3b8;
-            margin-top: 2px;
+            font-weight: 700;
+            color: #64748b;
+            margin-top: 4px;
             min-height: 11px;
             user-select: none;
             position: relative;
@@ -244,45 +341,82 @@
         }
 
         /* SAFETY & RULES INFO */
-        .rules-box { background: #fff; border-left: 3px solid #64748b; padding: 16px; margin-top: 35px; border-top: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; border-radius: 0 8px 8px 0; font-size: 12px; color: #475569; }
-        .rules-box strong { color: #334155; display: block; margin-bottom: 6px; font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .rules-box { 
+            border-left: 4px solid #64748b; 
+            padding: 18px; 
+            margin-top: 35px; 
+            font-size: 12.5px; color: #334155; font-weight: 600;
+        }
+        .rules-box strong { color: #1e293b; display: block; margin-bottom: 8px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 800; }
         
         /* FOOTER */
-        .footer-table { width: 100%; margin-top: 30px; padding-top: 15px; border-top: 1px solid #e2e8f0; font-size: 11px; color: #64748b; font-weight: 500; }
+        .footer-table { width: 100%; margin-top: 30px; padding-top: 15px; border-top: 1px solid rgba(30, 58, 138, 0.2); font-size: 11px; color: var(--text-muted); font-weight: 700; text-shadow: 0 1px 1px rgba(255,255,255,0.6); }
         .footer-left { text-align: left; }
         .footer-right { text-align: right; }
 
-        /* PRINT STYLES */
+        /* GLASS BUTTON */
+        .btn-glass {
+            padding: 14px 40px; 
+            background: rgba(30, 58, 138, 0.75); 
+            backdrop-filter: blur(10px);
+            color: white; 
+            border: 1px solid rgba(255, 255, 255, 0.4); 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-weight: 800; 
+            font-size: 14px; 
+            box-shadow: 0 8px 25px rgba(30, 58, 138, 0.3), inset 0 2px 4px rgba(255,255,255,0.3); 
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+        }
+
+        /* PRINT STYLES - Remove 3D & Glass effects for clean document printing */
         @media print {
             @page { size: A4 portrait; margin: 12mm; }
-            html, body { height: auto; background: #fff; padding: 0 !important; margin: 0 !important; color: #000; font-size: 12px; }
-            .form-container { box-shadow: none; border: none; max-width: 100%; width: 100%; padding: 0 !important; margin: 0 !important; background: transparent; }
+            html, body { height: auto; background: #fff !important; padding: 0 !important; margin: 0 !important; color: #000; font-size: 12px; }
+            .liquid-bg { display: none !important; }
+            .glass-panel, .interactive-glass { 
+                background: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; 
+                box-shadow: none !important; border: none !important; transform: none !important; 
+            }
+            .interactive-glass::before { display: none !important; }
+            .form-container { max-width: 100%; width: 100%; padding: 0 !important; margin: 0 !important; }
             .no-print, .search-section { display: none !important; }
-            .header-table { margin-bottom: 25px; padding-bottom: 10px; border-bottom: 2px solid var(--primary); }
-            .company-title h2 { font-size: 19px; }
-            .doc-title-box { padding: 8px 12px; background: #fff !important; border: 1px solid #94a3b8; }
-            .doc-title-main { font-size: 15px; }
-            .section-header { margin: 22px 0 12px 0; padding-bottom: 4px; font-size: 11px; }
-            .grid-2, .grid-3 { gap: 15px; margin-bottom: 10px; }
-            label { font-size: 9px; margin-bottom: 3px; }
-            input[type="text"] { border: none; border-bottom: 1px dashed #94a3b8; border-radius: 0; padding: 2px 0; background: transparent !important; font-size: 13px; color: #000; font-weight: 600; }
-            .klasifikasi-box { padding: 12px; border: 1px solid #cbd5e1; }
-            .checkbox-item { font-size: 11px; margin-bottom: 5px; color: #000; }
             
-            .validation-notice { background: #f8fafc !important; border: 1px solid #cbd5e1; border-left: 3px solid var(--primary); padding: 10px; font-size: 11px; margin-top: 25px; margin-bottom: 15px; }
-            .sig-wrapper { min-height: 185px; background-image: radial-gradient(rgba(0,0,0,0.05) 1px, transparent 0) !important; border: 1px solid #cbd5e1; }
-            .sig-title { font-size: 12px; color: #000 !important; }
-            .sig-qr { border: none; background: transparent; width: 75px; height: 75px; }
-            .sig-qr.placeholder { background: #f8fafc; border: 1px dashed #cbd5e1; }
-            .sig-stamp-name { font-size: 11px; color: #000; border-top: 1px solid #000; margin-top: 8px; padding-top: 4px; }
+            .header-table { margin-bottom: 25px; padding-bottom: 10px; border-bottom: 2px solid var(--primary); }
+            .company-title h2 { font-size: 19px; text-shadow: none; }
+            .doc-title-box { padding: 8px 12px; background: #fff !important; border: 1px solid #94a3b8 !important; }
+            .doc-title-main { font-size: 15px; text-shadow: none; }
+            .section-header { margin: 22px 0 12px 0; padding-bottom: 4px; font-size: 11px; text-shadow: none; }
+            .grid-2, .grid-3 { gap: 15px; margin-bottom: 10px; }
+            label { font-size: 9px; margin-bottom: 3px; text-shadow: none; }
+            
+            input[type="text"] { border: none !important; border-bottom: 1px dashed #94a3b8 !important; border-radius: 0 !important; padding: 2px 0 !important; background: transparent !important; font-size: 13px !important; color: #000 !important; box-shadow: none !important; }
+            .klasifikasi-box { padding: 12px !important; border: 1px solid #cbd5e1 !important; }
+            .checkbox-item { font-size: 11px; margin-bottom: 5px; color: #000; text-shadow: none; }
+            
+            .validation-notice { background: #f8fafc !important; border: 1px solid #cbd5e1 !important; border-left: 3px solid var(--primary) !important; padding: 10px !important; font-size: 11px !important; margin-top: 25px; margin-bottom: 15px; box-shadow: none !important; }
+            .sig-wrapper { min-height: 185px; background-image: radial-gradient(rgba(0,0,0,0.05) 1px, transparent 0) !important; border: 1px solid #cbd5e1 !important; }
+            .sig-title { font-size: 12px; color: #000 !important; text-shadow: none; }
+            .sig-qr { border: none !important; background: transparent !important; width: 75px !important; height: 75px !important; box-shadow: none !important; }
+            .sig-qr.placeholder { background: #f8fafc !important; border: 1px dashed #cbd5e1 !important; }
+            .sig-stamp-name { font-size: 11px; color: #000; border-top: 1px solid #000 !important; margin-top: 8px !important; padding-top: 4px !important; text-shadow: none; }
             .sig-security-token { color: #475569; font-size: 7px; }
-            .rules-box { margin-top: 20px; padding: 10px; font-size: 10.5px; border: 1px solid #cbd5e1; }
+            .rules-box { margin-top: 20px; padding: 10px; font-size: 10.5px; border: 1px solid #cbd5e1 !important; }
+            .footer-table { text-shadow: none; }
         }
     </style>
 </head>
 <body>
 
-<div class="form-container">
+<!-- Liquid Animated Background -->
+<div class="liquid-bg no-print">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+</div>
+
+<div class="form-container glass-panel">
     <table class="header-table">
         <tr>
             <td class="header-logo-cell">
@@ -293,12 +427,10 @@
                 </div>
             </td>
             <td class="header-title-cell">
-                <!-- Desain Kotak Sesuai Permintaan -->
-                <div class="doc-title-box">
+                <div class="doc-title-box glass-panel interactive-glass">
                     <span class="doc-title-main">Formulir Izin Terpadu</span>
                     <span class="doc-title-sub">(GATE PASS SYSTEM)</span>
                     <div class="doc-meta">No. Form: MSB/F-HR-006 &nbsp;|&nbsp; Rev: 00</div>
-                    <!-- Generator Kode Batang Hari & Waktu -->
                     <div class="barcode-container">
                         <svg id="header-barcode"></svg>
                     </div>
@@ -307,10 +439,10 @@
         </tr>
     </table>
 
-    <div class="search-section no-print">
+    <div class="search-section glass-panel interactive-glass no-print">
         <div class="search-group">
             <label for="id-izin-input">MASUKKAN ID IZIN :</label>
-            <input type="text" id="id-izin-input" class="search-input" placeholder="Ketik ID Izin (contoh: IZIN-001)..." autocomplete="off" data-testid="id-izin-input">
+            <input type="text" id="id-izin-input" placeholder="Ketik ID Izin (contoh: IZIN-001)..." autocomplete="off" data-testid="id-izin-input">
         </div>
         <span id="status-pill" class="status-pill" data-testid="status-pill">Menunggu input</span>
     </div>
@@ -327,13 +459,13 @@
 
     <div class="section-header">Klasifikasi Ketidakhadiran / Jenis Izin</div>
     <div class="grid-klasifikasi">
-        <div class="klasifikasi-box">
+        <div class="klasifikasi-box glass-panel interactive-glass">
             <h4>A. IZIN HARIAN (TIDAK MASUK)</h4>
             <label class="checkbox-item"><input type="checkbox" id="check-cuti" disabled> Cuti Tahunan (Annual Leave)</label>
             <label class="checkbox-item"><input type="checkbox" id="check-sakit" disabled> Izin Sakit (Medical - Lampirkan SKD)</label>
             <label class="checkbox-item"><input type="checkbox" id="check-duka" disabled> Duka / Kemalangan (Compassionate)</label>
         </div>
-        <div class="klasifikasi-box">
+        <div class="klasifikasi-box glass-panel interactive-glass">
             <h4>B. IZIN KELUAR (GATE PASS)</h4>
             <label class="checkbox-item"><input type="checkbox" id="check-dinas" disabled> Dinas Luar (Work Related)</label>
             <label class="checkbox-item"><input type="checkbox" id="check-pribadi" disabled> Izin Pribadi (Meninggalkan Kantor)</label>
@@ -361,16 +493,14 @@
         <div class="form-group"><label>Serah Terima Tugas (Handover Ke)</label><input type="text" id="handover-input" readonly data-testid="handover-input"></div>
     </div>
 
-    <!-- SYSTEM VALIDATION NOTICE -->
     <div class="validation-notice">
         <strong>SISTEM OTENTIKASI DIGITAL:</strong> Dokumen ini ditandatangani langsung secara sistem. Jika sudah ada tanda tangan (QR Code / Digital Stamp), maka dokumen dinyatakan <strong>VALID</strong>. Namun, jika belum ada tanda tangan, maka dokumen dinyatakan <strong>BELUM VALID</strong>.
     </div>
 
-    <!-- ELEGAN SIGNATURE MATRIX WITH ANTI-EDIT SYSTEM -->
     <table class="signature-table">
         <tr>
             <td>
-                <div class="sig-wrapper" data-testid="sig-pemohon">
+                <div class="sig-wrapper glass-panel interactive-glass" data-testid="sig-pemohon">
                     <div class="sig-security-watermark">MURINDA ORIGINAL DOCUMENT SECURE</div>
                     <div class="sig-title">Pemohon</div>
                     <div class="sig-stamp-text" id="sig-pemohon-text"></div>
@@ -380,7 +510,7 @@
                 </div>
             </td>
             <td>
-                <div class="sig-wrapper" data-testid="sig-atasan">
+                <div class="sig-wrapper glass-panel interactive-glass" data-testid="sig-atasan">
                     <div class="sig-security-watermark">MURINDA ORIGINAL DOCUMENT SECURE</div>
                     <div class="sig-title">Atasan Langsung</div>
                     <div class="sig-stamp-text" id="sig-atasan-text"></div>
@@ -390,7 +520,7 @@
                 </div>
             </td>
             <td>
-                <div class="sig-wrapper" data-testid="sig-hrd">
+                <div class="sig-wrapper glass-panel interactive-glass" data-testid="sig-hrd">
                     <div class="sig-security-watermark">MURINDA ORIGINAL DOCUMENT SECURE</div>
                     <div class="sig-title">HR Department</div>
                     <div class="sig-stamp-text" id="sig-hrd-text"></div>
@@ -400,7 +530,7 @@
                 </div>
             </td>
             <td>
-                <div class="sig-wrapper" data-testid="sig-security">
+                <div class="sig-wrapper glass-panel interactive-glass" data-testid="sig-security">
                     <div class="sig-security-watermark">MURINDA ORIGINAL DOCUMENT SECURE</div>
                     <div class="sig-title">Security Gate</div>
                     <div class="sig-stamp-text" id="sig-security-text"></div>
@@ -412,7 +542,7 @@
         </tr>
     </table>
 
-    <div class="rules-box">
+    <div class="rules-box glass-panel interactive-glass">
         <strong>Prosedur Keamanan &amp; Ketertiban Gerbang:</strong>
         <ol style="margin: 0; padding-left: 18px; line-height: 1.6;">
             <li>Pengajuan izin harian wajib dilakukan H-3, kecuali kondisi darurat medis/sakit.</li>
@@ -429,7 +559,7 @@
     </table>
 
     <div style="text-align: center; margin-top: 35px;" class="no-print">
-        <button onclick="window.print()" data-testid="btn-print" style="padding: 12px 35px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; box-shadow: 0 4px 10px rgba(30, 58, 138, 0.15); transition: all 0.2s ease; letter-spacing: 0.5px;">Cetak Dokumen / Simpan PDF</button>
+        <button onclick="window.print()" data-testid="btn-print" class="btn-glass interactive-glass">Cetak Dokumen / Simpan PDF</button>
     </div>
 </div>
 
@@ -438,7 +568,6 @@ const SHEET_ID   = "1Z95O80wBV2j2DMEJe59ZSShuJFuBSv6NcmhO39gYjlM";
 const SHEET_NAME = "Pengajuan";
 const CSV_URL    = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
 
-// Generate Realtime Barcode & Timestamp
 const now = new Date();
 document.getElementById('print-time').innerText =
     now.toLocaleString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + ' WIB';
@@ -451,7 +580,6 @@ function generateDateTimeBarcode() {
     const minutes = String(now.getMinutes()).padStart(2, '0');
     const seconds = String(now.getSeconds()).padStart(2, '0');
     
-    // Hasil string kode unik waktu: MSB-20260609-142400
     const codeValue = `MSB-${year}${month}${date}-${hours}${minutes}${seconds}`;
     
     JsBarcode("#header-barcode", codeValue, {
@@ -462,7 +590,8 @@ function generateDateTimeBarcode() {
         fontSize: 9,
         fontOptions: "bold",
         margin: 0,
-        lineColor: "#1e3a8a"
+        lineColor: "#1e3a8a",
+        background: "transparent"
     });
 }
 generateDateTimeBarcode();
@@ -551,12 +680,10 @@ function applyJenis(jenis) {
     else if (j.includes('terlambat')) document.getElementById('check-terlambat').checked = true;
 }
 
-// Anti-Counterfeit Token Generator (Lapis Keamanan 3)
 function generateSecurityToken(idIzin, prefix) {
     const el = document.getElementById('sig-' + prefix + '-token');
     if (!el) return;
     if (!idIzin) { el.textContent = ''; return; }
-    // Membuat hash samar berbasis base64 unik untuk mencegah manipulasi penempelan tanda tangan palsu
     const mockHash = btoa(idIzin + prefix + "SYS2026").substring(2, 16).toUpperCase();
     el.textContent = `AUTH-ID: [${mockHash}]`;
 }
@@ -579,7 +706,7 @@ function renderQRCode(prefix, content) {
     const el = document.getElementById('sig-' + prefix + '-qr');
     el.innerHTML = '';
     el.classList.remove('placeholder');
-    new QRCode(el, { text: content, width: 95, height: 95, correctLevel: QRCode.CorrectLevel.M });
+    new QRCode(el, { text: content, width: 88, height: 88, correctLevel: QRCode.CorrectLevel.M, colorDark: "#1e3a8a", colorLight: "transparent" });
 }
 
 function renderQRImage(prefix, src) {
@@ -589,7 +716,7 @@ function renderQRImage(prefix, src) {
     const img = document.createElement('img');
     img.src = src;
     img.alt = src;
-    img.onerror = () => { el.innerHTML = '<span style="color:#dc2626;font-size:9px;font-weight:600;padding:2px;line-height:1.2;">Gambar tidak ditemukan:<br>' + src + '</span>'; };
+    img.onerror = () => { el.innerHTML = '<span style="color:#dc2626;font-size:9px;font-weight:700;padding:2px;line-height:1.2;">Gambar tidak ditemukan:<br>' + src + '</span>'; };
     el.appendChild(img);
 }
 
@@ -620,7 +747,6 @@ function fillForm(row) {
     const idKar = row['ID Karyawan'] || '';
     const idIzin = row['ID Izin'] || '';
 
-    // Pemohon
     if (nama) {
         setSignatureText('pemohon', nama);
         const qrContent = (idKar ? idKar + ' | ' : '') + nama + (idIzin ? ' | ' + idIzin : '');
@@ -628,7 +754,6 @@ function fillForm(row) {
         generateSecurityToken(idIzin, 'pemohon');
     } else { clearSignature('pemohon'); }
 
-    // Atasan
     const manager = (row['Manager'] || '').trim();
     if (manager) {
         setSignatureText('atasan', manager);
@@ -636,7 +761,6 @@ function fillForm(row) {
         generateSecurityToken(idIzin, 'atasan');
     } else { clearSignature('atasan'); }
 
-    // HRD
     const hrdVal = (row['HRD'] || '').toLowerCase();
     if (hrdVal.includes('konfirmasi')) {
         setSignatureText('hrd', 'HR Department');
@@ -644,7 +768,6 @@ function fillForm(row) {
         generateSecurityToken(idIzin, 'hrd');
     } else { clearSignature('hrd'); }
 
-    // Security
     const secVal = (row['Security'] || '').toLowerCase();
     if (secVal.includes('konfirmasi')) {
         setSignatureText('security', 'Security Gate');
