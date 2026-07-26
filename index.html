@@ -566,9 +566,11 @@
 const SHEET_ID   = "1Z95O80wBV2j2DMEJe59ZSShuJFuBSv6NcmhO39gYjlM";
 const SHEET_NAME = "Pengajuan";
 const SHEET_PERSETUJUAN = "Persetujuan";
+const SHEET_KARYAWAN = "Karyawan"; // Penambahan integrasi sheet Karyawan
 
 const CSV_URL    = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
 const CSV_PERSETUJUAN_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_PERSETUJUAN)}`;
+const CSV_KARYAWAN_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_KARYAWAN)}`;
 
 const now = new Date();
 document.getElementById('print-time').innerText =
@@ -639,11 +641,12 @@ function setStatus(text, kind) {
 }
 
 let DATA_CACHE = null;
-let PERSETUJUAN_ROWS = null;
+let PERSETUJUAN_CACHE = null;
+let KARYAWAN_CACHE = null;
 let FETCH_PROMISE = null;
 
 async function loadData(force=false) {
-    if (DATA_CACHE && PERSETUJUAN_ROWS && !force) return DATA_CACHE;
+    if (DATA_CACHE && PERSETUJUAN_CACHE && KARYAWAN_CACHE && !force) return DATA_CACHE;
     if (FETCH_PROMISE) return FETCH_PROMISE;
     setStatus('Memuat database...', 'loading');
     
@@ -653,18 +656,17 @@ async function loadData(force=false) {
             return r.text();
         }),
         fetch(CSV_PERSETUJUAN_URL + '&_ts=' + Date.now()).then(r => {
-            if (!r.ok) return ""; // Fallback untuk memastikan form tidak error jika Persetujuan gagal/tidak ada
+            if (!r.ok) return ""; 
+            return r.text();
+        }),
+        fetch(CSV_KARYAWAN_URL + '&_ts=' + Date.now()).then(r => {
+            if (!r.ok) return ""; 
             return r.text();
         })
-    ]).then(([textPengajuan, textPersetujuan]) => {
-        const rows = parseCSV(textPengajuan);
-        DATA_CACHE = rowsToObjects(rows);
-        
-        if (textPersetujuan) {
-            PERSETUJUAN_ROWS = parseCSV(textPersetujuan);
-        } else {
-            PERSETUJUAN_ROWS = [];
-        }
+    ]).then(([textPengajuan, textPersetujuan, textKaryawan]) => {
+        DATA_CACHE = rowsToObjects(parseCSV(textPengajuan));
+        PERSETUJUAN_CACHE = textPersetujuan ? rowsToObjects(parseCSV(textPersetujuan)) : [];
+        KARYAWAN_CACHE = textKaryawan ? rowsToObjects(parseCSV(textKaryawan)) : [];
         
         setStatus('Database siap (' + DATA_CACHE.length + ' baris)', 'success');
         return DATA_CACHE;
@@ -678,7 +680,7 @@ async function loadData(force=false) {
     return FETCH_PROMISE;
 }
 
-setInterval(() => { DATA_CACHE = null; PERSETUJUAN_ROWS = null; FETCH_PROMISE = null; loadData(true); }, 30000);
+setInterval(() => { DATA_CACHE = null; PERSETUJUAN_CACHE = null; KARYAWAN_CACHE = null; FETCH_PROMISE = null; loadData(true); }, 30000);
 
 const CHECK_IDS = ['check-cuti','check-sakit','check-duka','check-dinas','check-pribadi','check-pulang','check-mendesak','check-terlambat'];
 function clearChecks() { CHECK_IDS.forEach(id => document.getElementById(id).checked = false); }
@@ -750,10 +752,27 @@ function fillForm(row) {
     const nama = row['Nama Lengkap'] || '';
     const idKar = row['ID Karyawan'] || '';
     const idIzin = row['ID Izin'] || '';
+    const deptVal = (row['Departemen'] || '').trim();
+
+    // --- PEMOHON ---
+    let profilLink = "";
+    if (KARYAWAN_CACHE && nama) {
+        // Cari data karyawan berdasarkan Nama
+        const karRow = KARYAWAN_CACHE.find(k => {
+            const namaKey = Object.keys(k).find(key => key.toLowerCase().includes('nama'));
+            return namaKey && (k[namaKey] || '').trim().toLowerCase() === nama.toLowerCase();
+        });
+        
+        // Ekstrak link generate QR dari kolom Profil (N)
+        if (karRow) {
+            const profilKey = Object.keys(karRow).find(k => k.toLowerCase().includes('profil'));
+            if (profilKey && karRow[profilKey]) profilLink = karRow[profilKey].trim();
+        }
+    }
 
     if (nama) {
         setSignatureText('pemohon', nama);
-        const qrContent = (idKar ? idKar + ' | ' : '') + nama + (idIzin ? ' | ' + idIzin : '');
+        const qrContent = profilLink ? profilLink : ((idKar ? idKar + ' | ' : '') + nama + (idIzin ? ' | ' + idIzin : ''));
         renderQRCode('pemohon', qrContent);
         generateSecurityToken(idIzin, 'pemohon');
     } else { clearSignature('pemohon'); }
@@ -761,20 +780,22 @@ function fillForm(row) {
     // --- MANAJER ---
     const managerVal = (row['Manager'] || '').trim();
     if (managerVal) {
-        let namaManager = managerVal; // Default nama atasan
-        let linkQR = managerVal;      // Default isi QR
-
-        // Mencari pencocokan (Jabatan/Nama) di Sheet Persetujuan
-        if (PERSETUJUAN_ROWS && PERSETUJUAN_ROWS.length > 0) {
-            for (let i = 1; i < PERSETUJUAN_ROWS.length; i++) {
-                const pRow = PERSETUJUAN_ROWS[i];
-                // Cek apabila salah satu sel pada baris (seperti jabatan) sesuai dengan managerVal dari Sheet Pengajuan
-                if (pRow.some(cell => (cell || '').trim().toLowerCase() === managerVal.toLowerCase())) {
-                    // Asumsi struktur kolom Persetujuan berdasarkan indeks array (0=Kolom A, 1=Kolom B, 2=Kolom C, 3=Kolom D)
-                    if (pRow[0]) namaManager = pRow[0].trim(); // Kolom A: Nama Manager
-                    if (pRow[3]) linkQR = pRow[3].trim();      // Kolom D: Link QR Code
-                    break;
-                }
+        let namaManager = managerVal; // Default apabila data di sheet persetujuan kosong
+        let linkQR = managerVal;      // Default apabila data di sheet persetujuan kosong
+        
+        // Pencocokan Departemen di Sheet Persetujuan
+        if (PERSETUJUAN_CACHE && deptVal) {
+            const pRow = PERSETUJUAN_CACHE.find(p => {
+                const deptKey = Object.keys(p).find(k => k.toLowerCase().includes('depart'));
+                return deptKey && (p[deptKey] || '').trim().toLowerCase() === deptVal.toLowerCase();
+            });
+            
+            if (pRow) {
+                const namaKey = Object.keys(pRow).find(k => k.toLowerCase().includes('nama'));
+                if (namaKey && pRow[namaKey].trim()) namaManager = pRow[namaKey].trim();
+                
+                const qrKey = Object.keys(pRow).find(k => k.toLowerCase().includes('qr'));
+                if (qrKey && pRow[qrKey].trim()) linkQR = pRow[qrKey].trim();
             }
         }
         
@@ -787,7 +808,6 @@ function fillForm(row) {
     const hrdVal = (row['HRD'] || '').trim();
     if (hrdVal) {
         setSignatureText('hrd', 'HR Department');
-        // Generate QR code secara langsung dari konten sel HRD (Kolom R)
         renderQRCode('hrd', hrdVal);
         generateSecurityToken(idIzin, 'hrd');
     } else { clearSignature('hrd'); }
@@ -796,7 +816,6 @@ function fillForm(row) {
     const secVal = (row['Security'] || '').trim();
     if (secVal) {
         setSignatureText('security', 'Security Gate');
-        // Generate QR code secara langsung dari konten sel Security (Kolom S)
         renderQRCode('security', secVal);
         generateSecurityToken(idIzin, 'security');
     } else { clearSignature('security'); }
