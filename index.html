@@ -709,17 +709,6 @@ function renderQRCode(prefix, content) {
     new QRCode(el, { text: content, width: 88, height: 88, correctLevel: QRCode.CorrectLevel.M, colorDark: "#1e3a8a", colorLight: "transparent" });
 }
 
-function renderQRImage(prefix, src) {
-    const el = document.getElementById('sig-' + prefix + '-qr');
-    el.innerHTML = '';
-    el.classList.remove('placeholder');
-    const img = document.createElement('img');
-    img.src = src;
-    img.alt = src;
-    img.onerror = () => { el.innerHTML = '<span style="color:#dc2626;font-size:9px;font-weight:700;padding:2px;line-height:1.2;">Gambar tidak ditemukan:<br>' + src + '</span>'; };
-    el.appendChild(img);
-}
-
 function clearForm() {
     ['nik-input','nama-input','jabatan-input','dept-input','tgl-mulai-input','tgl-selesai-input','durasi-input','jam-keluar-input','jam-kembali-input','kembali-input','keterangan-input','handover-input']
       .forEach(id => document.getElementById(id).value = '');
@@ -747,33 +736,53 @@ function fillForm(row) {
     const idKar = row['ID Karyawan'] || '';
     const idIzin = row['ID Izin'] || '';
 
+    // -- 1. QR Code Pemohon --
     if (nama) {
         setSignatureText('pemohon', nama);
         const qrContent = (idKar ? idKar + ' | ' : '') + nama + (idIzin ? ' | ' + idIzin : '');
         renderQRCode('pemohon', qrContent);
         generateSecurityToken(idIzin, 'pemohon');
-    } else { clearSignature('pemohon'); }
+    } else { 
+        clearSignature('pemohon'); 
+    }
 
+    // -- 2. QR Code Manager (Atasan Langsung) --
+    // Mengambil langsung data dari Kolom Manager (Q) dan mengubahnya menjadi QR Code
     const manager = (row['Manager'] || '').trim();
     if (manager) {
-        setSignatureText('atasan', manager);
-        renderQRImage('atasan', encodeURIComponent(manager) + '.png');
+        let displayName = manager;
+        // Jika isinya berupa link URL yang sangat panjang, kita set labelnya agar rapi
+        if(manager.startsWith('http')) {
+            displayName = "Approved by Manager";
+        }
+        setSignatureText('atasan', displayName);
+        renderQRCode('atasan', manager);
         generateSecurityToken(idIzin, 'atasan');
-    } else { clearSignature('atasan'); }
+    } else { 
+        clearSignature('atasan'); 
+    }
 
-    const hrdVal = (row['HRD'] || '').toLowerCase();
-    if (hrdVal.includes('konfirmasi')) {
+    // -- 3. QR Code HRD --
+    // Mengambil langsung data dari Kolom HRD (R) dan mengubahnya menjadi QR Code
+    const hrdVal = (row['HRD'] || '').trim();
+    if (hrdVal) {
         setSignatureText('hrd', 'HR Department');
-        renderQRImage('hrd', 'HR.png');
+        renderQRCode('hrd', hrdVal);
         generateSecurityToken(idIzin, 'hrd');
-    } else { clearSignature('hrd'); }
+    } else { 
+        clearSignature('hrd'); 
+    }
 
-    const secVal = (row['Security'] || '').toLowerCase();
-    if (secVal.includes('konfirmasi')) {
+    // -- 4. QR Code Security --
+    // Mengambil langsung data dari Kolom Security (S) dan mengubahnya menjadi QR Code
+    const secVal = (row['Security'] || '').trim();
+    if (secVal) {
         setSignatureText('security', 'Security Gate');
-        renderQRImage('security', 'Security.png');
+        renderQRCode('security', secVal);
         generateSecurityToken(idIzin, 'security');
-    } else { clearSignature('security'); }
+    } else { 
+        clearSignature('security'); 
+    }
 }
 
 const idInput = document.getElementById('id-izin-input');
