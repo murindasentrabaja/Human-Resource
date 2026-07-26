@@ -93,7 +93,6 @@
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease, background 0.3s ease;
         }
 
-        /* Efek Pantulan Cahaya (Light Sweep) */
         .interactive-glass::before {
             content: '';
             position: absolute;
@@ -370,7 +369,7 @@
             text-transform: uppercase;
         }
 
-        /* PRINT STYLES - Remove 3D & Glass effects for clean document printing */
+        /* PRINT STYLES */
         @media print {
             @page { size: A4 portrait; margin: 12mm; }
             html, body { height: auto; background: #fff !important; padding: 0 !important; margin: 0 !important; color: #000; font-size: 12px; }
@@ -566,7 +565,11 @@
 <script>
 const SHEET_ID   = "1Z95O80wBV2j2DMEJe59ZSShuJFuBSv6NcmhO39gYjlM";
 const SHEET_NAME = "Pengajuan";
+const SHEET_PERSETUJUAN = "Persetujuan";
+
+// Mengembalikan URL Fetch persis ke versi original yang sukses, HILANGKAN parameter tambahan (_ts)
 const CSV_URL    = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
+const CSV_PERSETUJUAN_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_PERSETUJUAN)}`;
 
 const now = new Date();
 document.getElementById('print-time').innerText =
@@ -637,33 +640,51 @@ function setStatus(text, kind) {
 }
 
 let DATA_CACHE = null;
-let FETCH_PROMISE = null;
+let PERSETUJUAN_ROWS = [];
 
-async function loadData(force=false) {
-    if (DATA_CACHE && !force) return DATA_CACHE;
-    if (FETCH_PROMISE) return FETCH_PROMISE;
+// FUNGSI LOADDATA DIBUAT SANGAT STANDAR & AMAN
+async function loadData() {
+    if (DATA_CACHE) return DATA_CACHE;
     setStatus('Memuat database...', 'loading');
-    FETCH_PROMISE = fetch(CSV_URL + '&_ts=' + Date.now())
-        .then(r => {
-            if (!r.ok) throw new Error('HTTP ' + r.status);
-            return r.text();
-        })
-        .then(text => {
-            const rows = parseCSV(text);
-            DATA_CACHE = rowsToObjects(rows);
-            setStatus('Database siap (' + DATA_CACHE.length + ' baris)', 'success');
-            return DATA_CACHE;
-        })
-        .catch(err => {
-            console.error(err);
-            setStatus('Gagal memuat spreadsheet', 'error');
-            FETCH_PROMISE = null;
-            throw err;
-        });
-    return FETCH_PROMISE;
+    
+    try {
+        // 1. Tarik Data Utama (Pengajuan) - murni seperti kode asli
+        const resPengajuan = await fetch(CSV_URL);
+        const textPengajuan = await resPengajuan.text();
+        
+        // Deteksi jika Google Sheets menolak akses dan malah memberikan halaman login HTML
+        if (textPengajuan.trim().toLowerCase().startsWith('<!doctype html>') || textPengajuan.trim().toLowerCase().startsWith('<html')) {
+            throw new Error("Akses Spreadsheet Ditolak. Pastikan link sudah di-set 'Anyone with the link can view'.");
+        }
+        
+        DATA_CACHE = rowsToObjects(parseCSV(textPengajuan));
+        
+        // 2. Tarik Data Persetujuan secara terpisah (try/catch independen agar tidak menggagalkan fungsi utama)
+        try {
+            const resPersetujuan = await fetch(CSV_PERSETUJUAN_URL);
+            const textPersetujuan = await resPersetujuan.text();
+            if (!textPersetujuan.trim().toLowerCase().startsWith('<!doctype html>') && !textPersetujuan.trim().toLowerCase().startsWith('<html')) {
+                PERSETUJUAN_ROWS = parseCSV(textPersetujuan);
+            } else {
+                PERSETUJUAN_ROWS = [];
+            }
+        } catch (errPersetujuan) {
+            console.warn("Gagal memuat sheet Persetujuan, diabaikan.", errPersetujuan);
+            PERSETUJUAN_ROWS = [];
+        }
+        
+        setStatus('Database siap (' + DATA_CACHE.length + ' baris)', 'success');
+        return DATA_CACHE;
+        
+    } catch (err) {
+        console.error(err);
+        setStatus('Gagal memuat spreadsheet', 'error');
+        throw err;
+    }
 }
 
-setInterval(() => { DATA_CACHE = null; FETCH_PROMISE = null; loadData(true); }, 30000);
+// Auto-refresh cache dikembalikan ke standar yang tidak mengganggu
+setInterval(() => { DATA_CACHE = null; PERSETUJUAN_ROWS = []; }, 30000);
 
 const CHECK_IDS = ['check-cuti','check-sakit','check-duka','check-dinas','check-pribadi','check-pulang','check-mendesak','check-terlambat'];
 function clearChecks() { CHECK_IDS.forEach(id => document.getElementById(id).checked = false); }
@@ -736,53 +757,50 @@ function fillForm(row) {
     const idKar = row['ID Karyawan'] || '';
     const idIzin = row['ID Izin'] || '';
 
-    // -- 1. QR Code Pemohon --
     if (nama) {
         setSignatureText('pemohon', nama);
         const qrContent = (idKar ? idKar + ' | ' : '') + nama + (idIzin ? ' | ' + idIzin : '');
         renderQRCode('pemohon', qrContent);
         generateSecurityToken(idIzin, 'pemohon');
-    } else { 
-        clearSignature('pemohon'); 
-    }
+    } else { clearSignature('pemohon'); }
 
-    // -- 2. QR Code Manager (Atasan Langsung) --
-    // Mengambil langsung data dari Kolom Manager (Q) dan mengubahnya menjadi QR Code
-    const manager = (row['Manager'] || '').trim();
-    if (manager) {
-        let displayName = manager;
-        // Jika isinya berupa link URL yang sangat panjang, kita set labelnya agar rapi
-        if(manager.startsWith('http')) {
-            displayName = "Approved by Manager";
+    // --- MANAJER ---
+    const managerVal = (row['Manager'] || '').trim();
+    if (managerVal) {
+        let namaManager = managerVal;
+        let linkQR = managerVal;      
+
+        if (PERSETUJUAN_ROWS && PERSETUJUAN_ROWS.length > 0) {
+            for (let i = 1; i < PERSETUJUAN_ROWS.length; i++) {
+                const pRow = PERSETUJUAN_ROWS[i];
+                if (pRow.some(cell => (cell || '').trim().toLowerCase() === managerVal.toLowerCase())) {
+                    if (pRow[0]) namaManager = pRow[0].trim(); 
+                    if (pRow[3]) linkQR = pRow[3].trim();      
+                    break;
+                }
+            }
         }
-        setSignatureText('atasan', displayName);
-        renderQRCode('atasan', manager);
+        
+        setSignatureText('atasan', namaManager);
+        renderQRCode('atasan', linkQR);
         generateSecurityToken(idIzin, 'atasan');
-    } else { 
-        clearSignature('atasan'); 
-    }
+    } else { clearSignature('atasan'); }
 
-    // -- 3. QR Code HRD --
-    // Mengambil langsung data dari Kolom HRD (R) dan mengubahnya menjadi QR Code
+    // --- HRD ---
     const hrdVal = (row['HRD'] || '').trim();
     if (hrdVal) {
         setSignatureText('hrd', 'HR Department');
         renderQRCode('hrd', hrdVal);
         generateSecurityToken(idIzin, 'hrd');
-    } else { 
-        clearSignature('hrd'); 
-    }
+    } else { clearSignature('hrd'); }
 
-    // -- 4. QR Code Security --
-    // Mengambil langsung data dari Kolom Security (S) dan mengubahnya menjadi QR Code
+    // --- SECURITY ---
     const secVal = (row['Security'] || '').trim();
     if (secVal) {
         setSignatureText('security', 'Security Gate');
         renderQRCode('security', secVal);
         generateSecurityToken(idIzin, 'security');
-    } else { 
-        clearSignature('security'); 
-    }
+    } else { clearSignature('security'); }
 }
 
 const idInput = document.getElementById('id-izin-input');
@@ -812,6 +830,7 @@ idInput.addEventListener('input', () => {
     debounceTimer = setTimeout(performSearch, 350);
 });
 
+// Load data saat halaman pertama kali dibuka
 loadData().catch(() => {});
 window.__app = { performSearch, loadData, fillForm };
 </script>
