@@ -566,7 +566,7 @@
 const SHEET_ID   = "1Z95O80wBV2j2DMEJe59ZSShuJFuBSv6NcmhO39gYjlM";
 const SHEET_NAME = "Pengajuan";
 const SHEET_PERSETUJUAN = "Persetujuan";
-const SHEET_KARYAWAN = "Karyawan"; // Penambahan integrasi sheet Karyawan
+const SHEET_KARYAWAN = "Karyawan";
 
 const CSV_URL    = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
 const CSV_PERSETUJUAN_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_PERSETUJUAN)}`;
@@ -756,34 +756,43 @@ function fillForm(row) {
 
     // --- PEMOHON ---
     let profilLink = "";
-    if (KARYAWAN_CACHE && nama) {
-        // Cari data karyawan berdasarkan Nama
+    if (KARYAWAN_CACHE && (nama || idKar)) {
+        // Cari baris karyawan berdasarkan NIK atau Nama untuk meminimalkan salah identifikasi
         const karRow = KARYAWAN_CACHE.find(k => {
-            const namaKey = Object.keys(k).find(key => key.toLowerCase().includes('nama'));
-            return namaKey && (k[namaKey] || '').trim().toLowerCase() === nama.toLowerCase();
+            const kNamaKey = Object.keys(k).find(key => key.toLowerCase().includes('nama'));
+            const kNikKey = Object.keys(k).find(key => key.toLowerCase().includes('nik') || key.toLowerCase().includes('id kar'));
+            
+            const matchNama = kNamaKey && nama && (k[kNamaKey] || '').trim().toLowerCase() === nama.toLowerCase();
+            const matchNik = kNikKey && idKar && (k[kNikKey] || '').trim().toLowerCase() === idKar.toLowerCase();
+            
+            return matchNik || matchNama;
         });
         
-        // Ekstrak link generate QR dari kolom Profil (N)
         if (karRow) {
-            const profilKey = Object.keys(karRow).find(k => k.toLowerCase().includes('profil'));
-            if (profilKey && karRow[profilKey]) profilLink = karRow[profilKey].trim();
+            // Ambil data langsung dan spesifik dari kolom yang header-nya bernama 'Profil'
+            const profilKey = Object.keys(karRow).find(k => k.trim().toLowerCase() === 'profil');
+            if (profilKey && karRow[profilKey]) {
+                profilLink = karRow[profilKey].trim();
+            }
         }
     }
 
     if (nama) {
         setSignatureText('pemohon', nama);
-        const qrContent = profilLink ? profilLink : ((idKar ? idKar + ' | ' : '') + nama + (idIzin ? ' | ' + idIzin : ''));
+        // Jika profilLink ditemukan, gunakan itu secara mutlak. Jika kosong, baru menggunakan teks fallback.
+        const qrContent = profilLink ? profilLink : ((idKar ? idKar + ' | ' : '') + nama);
         renderQRCode('pemohon', qrContent);
         generateSecurityToken(idIzin, 'pemohon');
-    } else { clearSignature('pemohon'); }
+    } else { 
+        clearSignature('pemohon'); 
+    }
 
     // --- MANAJER ---
     const managerVal = (row['Manager'] || '').trim();
     if (managerVal) {
-        let namaManager = managerVal; // Default apabila data di sheet persetujuan kosong
-        let linkQR = managerVal;      // Default apabila data di sheet persetujuan kosong
+        let namaManager = managerVal; 
+        let linkQR = managerVal;      
         
-        // Pencocokan Departemen di Sheet Persetujuan
         if (PERSETUJUAN_CACHE && deptVal) {
             const pRow = PERSETUJUAN_CACHE.find(p => {
                 const deptKey = Object.keys(p).find(k => k.toLowerCase().includes('depart'));
