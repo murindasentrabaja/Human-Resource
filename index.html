@@ -567,7 +567,6 @@ const SHEET_ID   = "1Z95O80wBV2j2DMEJe59ZSShuJFuBSv6NcmhO39gYjlM";
 const SHEET_NAME = "Pengajuan";
 const SHEET_PERSETUJUAN = "Persetujuan";
 
-// Mengembalikan URL Fetch persis ke versi original yang sukses, HILANGKAN parameter tambahan (_ts)
 const CSV_URL    = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
 const CSV_PERSETUJUAN_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_PERSETUJUAN)}`;
 
@@ -640,51 +639,46 @@ function setStatus(text, kind) {
 }
 
 let DATA_CACHE = null;
-let PERSETUJUAN_ROWS = [];
+let PERSETUJUAN_ROWS = null;
+let FETCH_PROMISE = null;
 
-// FUNGSI LOADDATA DIBUAT SANGAT STANDAR & AMAN
-async function loadData() {
-    if (DATA_CACHE) return DATA_CACHE;
+async function loadData(force=false) {
+    if (DATA_CACHE && PERSETUJUAN_ROWS && !force) return DATA_CACHE;
+    if (FETCH_PROMISE) return FETCH_PROMISE;
     setStatus('Memuat database...', 'loading');
     
-    try {
-        // 1. Tarik Data Utama (Pengajuan) - murni seperti kode asli
-        const resPengajuan = await fetch(CSV_URL);
-        const textPengajuan = await resPengajuan.text();
+    FETCH_PROMISE = Promise.all([
+        fetch(CSV_URL + '&_ts=' + Date.now()).then(r => {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.text();
+        }),
+        fetch(CSV_PERSETUJUAN_URL + '&_ts=' + Date.now()).then(r => {
+            if (!r.ok) return ""; // Fallback untuk memastikan form tidak error jika Persetujuan gagal/tidak ada
+            return r.text();
+        })
+    ]).then(([textPengajuan, textPersetujuan]) => {
+        const rows = parseCSV(textPengajuan);
+        DATA_CACHE = rowsToObjects(rows);
         
-        // Deteksi jika Google Sheets menolak akses dan malah memberikan halaman login HTML
-        if (textPengajuan.trim().toLowerCase().startsWith('<!doctype html>') || textPengajuan.trim().toLowerCase().startsWith('<html')) {
-            throw new Error("Akses Spreadsheet Ditolak. Pastikan link sudah di-set 'Anyone with the link can view'.");
-        }
-        
-        DATA_CACHE = rowsToObjects(parseCSV(textPengajuan));
-        
-        // 2. Tarik Data Persetujuan secara terpisah (try/catch independen agar tidak menggagalkan fungsi utama)
-        try {
-            const resPersetujuan = await fetch(CSV_PERSETUJUAN_URL);
-            const textPersetujuan = await resPersetujuan.text();
-            if (!textPersetujuan.trim().toLowerCase().startsWith('<!doctype html>') && !textPersetujuan.trim().toLowerCase().startsWith('<html')) {
-                PERSETUJUAN_ROWS = parseCSV(textPersetujuan);
-            } else {
-                PERSETUJUAN_ROWS = [];
-            }
-        } catch (errPersetujuan) {
-            console.warn("Gagal memuat sheet Persetujuan, diabaikan.", errPersetujuan);
+        if (textPersetujuan) {
+            PERSETUJUAN_ROWS = parseCSV(textPersetujuan);
+        } else {
             PERSETUJUAN_ROWS = [];
         }
         
         setStatus('Database siap (' + DATA_CACHE.length + ' baris)', 'success');
         return DATA_CACHE;
-        
-    } catch (err) {
+    }).catch(err => {
         console.error(err);
         setStatus('Gagal memuat spreadsheet', 'error');
+        FETCH_PROMISE = null;
         throw err;
-    }
+    });
+    
+    return FETCH_PROMISE;
 }
 
-// Auto-refresh cache dikembalikan ke standar yang tidak mengganggu
-setInterval(() => { DATA_CACHE = null; PERSETUJUAN_ROWS = []; }, 30000);
+setInterval(() => { DATA_CACHE = null; PERSETUJUAN_ROWS = null; FETCH_PROMISE = null; loadData(true); }, 30000);
 
 const CHECK_IDS = ['check-cuti','check-sakit','check-duka','check-dinas','check-pribadi','check-pulang','check-mendesak','check-terlambat'];
 function clearChecks() { CHECK_IDS.forEach(id => document.getElementById(id).checked = false); }
@@ -767,15 +761,18 @@ function fillForm(row) {
     // --- MANAJER ---
     const managerVal = (row['Manager'] || '').trim();
     if (managerVal) {
-        let namaManager = managerVal;
-        let linkQR = managerVal;      
+        let namaManager = managerVal; // Default nama atasan
+        let linkQR = managerVal;      // Default isi QR
 
+        // Mencari pencocokan (Jabatan/Nama) di Sheet Persetujuan
         if (PERSETUJUAN_ROWS && PERSETUJUAN_ROWS.length > 0) {
             for (let i = 1; i < PERSETUJUAN_ROWS.length; i++) {
                 const pRow = PERSETUJUAN_ROWS[i];
+                // Cek apabila salah satu sel pada baris (seperti jabatan) sesuai dengan managerVal dari Sheet Pengajuan
                 if (pRow.some(cell => (cell || '').trim().toLowerCase() === managerVal.toLowerCase())) {
-                    if (pRow[0]) namaManager = pRow[0].trim(); 
-                    if (pRow[3]) linkQR = pRow[3].trim();      
+                    // Asumsi struktur kolom Persetujuan berdasarkan indeks array (0=Kolom A, 1=Kolom B, 2=Kolom C, 3=Kolom D)
+                    if (pRow[0]) namaManager = pRow[0].trim(); // Kolom A: Nama Manager
+                    if (pRow[3]) linkQR = pRow[3].trim();      // Kolom D: Link QR Code
                     break;
                 }
             }
@@ -790,6 +787,7 @@ function fillForm(row) {
     const hrdVal = (row['HRD'] || '').trim();
     if (hrdVal) {
         setSignatureText('hrd', 'HR Department');
+        // Generate QR code secara langsung dari konten sel HRD (Kolom R)
         renderQRCode('hrd', hrdVal);
         generateSecurityToken(idIzin, 'hrd');
     } else { clearSignature('hrd'); }
@@ -798,6 +796,7 @@ function fillForm(row) {
     const secVal = (row['Security'] || '').trim();
     if (secVal) {
         setSignatureText('security', 'Security Gate');
+        // Generate QR code secara langsung dari konten sel Security (Kolom S)
         renderQRCode('security', secVal);
         generateSecurityToken(idIzin, 'security');
     } else { clearSignature('security'); }
@@ -830,7 +829,6 @@ idInput.addEventListener('input', () => {
     debounceTimer = setTimeout(performSearch, 350);
 });
 
-// Load data saat halaman pertama kali dibuka
 loadData().catch(() => {});
 window.__app = { performSearch, loadData, fillForm };
 </script>
